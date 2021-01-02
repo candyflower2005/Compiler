@@ -1,0 +1,2 @@
+Nie wiem, jaka była dokładnie specyfikacja, ale nie ewaluuję w czasie kompilacji wywołań funkcji (nawet jeśli jest to możliwe).
+Dlatego np. frontend przepuszcza przykład bad025.lat.

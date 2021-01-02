@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="Latte"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Latte">
+				<Option output="/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Latte" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/cukiereczek/Workspace/MRJP/Latte/src/backend"/>
+					<Add directory="/home/cukiereczek/Workspace/MRJP/Latte/src/frontend"/>
+					<Add directory="/home/cukiereczek/Workspace/MRJP/Latte/src/general"/>
+					<Add directory="/home/cukiereczek/Workspace/MRJP/Latte/src/grammar"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 Latte"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Latte/fast">
+				<Option output="/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Latte" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/cukiereczek/Workspace/MRJP/Latte/src/backend"/>
+					<Add directory="/home/cukiereczek/Workspace/MRJP/Latte/src/frontend"/>
+					<Add directory="/home/cukiereczek/Workspace/MRJP/Latte/src/general"/>
+					<Add directory="/home/cukiereczek/Workspace/MRJP/Latte/src/grammar"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 Latte/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/backend/Optimizer.cpp">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/backend/Optimizer.h">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/backend/QuadrupleGenerator.cpp">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/backend/QuadrupleGenerator.h">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/frontend/DeclFrontend.cpp">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/frontend/DeclFrontend.h">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/frontend/ExprFrontend.cpp">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/frontend/ExprFrontend.h">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/frontend/Frontend.cpp">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/frontend/Frontend.h">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/frontend/TopDefFrontend.cpp">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/frontend/TopDefFrontend.h">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/general/environment.cpp">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/general/environment.h">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/general/function_def.cpp">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/general/function_def.h">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/general/latc.cpp">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/general/logger.cpp">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/general/logger.h">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/general/quadruple_environment.cpp">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/general/quadruple_environment.h">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/general/types.cpp">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/general/types.h">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/grammar/Absyn.C">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/grammar/Absyn.H">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/grammar/Lexer.C">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/grammar/Parser.C">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/grammar/Parser.H">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/grammar/Printer.C">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/grammar/Printer.H">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

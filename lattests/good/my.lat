@@ -1,0 +1,30 @@
+int main() {
+	int n = 10;
+	int r = 1;
+	while (n>0) {
+		r = r * n;
+		n--;
+	}
+	printInt(r);
+
+	if (r>100) {
+		return 0;
+	} else {
+		printString("r jest za małe");
+	}
+}
+
+/*
+int fac(int a) {
+	int r;
+	int n;
+
+	r = 1;
+	n = a;
+	while (n > 0) {
+	  r = r * n;
+	  n = n - 1;
+	}
+	return r;
+}
+*/
