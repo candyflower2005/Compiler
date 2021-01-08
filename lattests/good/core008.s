@@ -13,7 +13,7 @@ main:
 	movl $1234234, %eax
 	movl %eax, -16(%ebp)
 	movl -16(%ebp), %eax
-	negl %eax
+	neg %eax
 	movl %eax, -20(%ebp)
 	movl -20(%ebp), %eax
 	movl %eax, -24(%ebp)

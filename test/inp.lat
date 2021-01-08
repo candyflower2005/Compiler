@@ -1,0 +1,135 @@
+// Author: Krzysztof Małysa (2020)
+int main() {
+	check_constexpr();
+	check_runtime();
+	return 0;
+}
+int check_constexpr() {
+	if (4 + 42 != 46) {error();}
+
+	if (46 - 4 != 42) {error();}
+	if (46 * 4 != 184) {error();}
+	if (46 / 4 != 11) {error();}
+	if (46 % 4 != 2) {error();}
+
+	if (!(42 < 46)) {error();}
+	if (46 < 42) {error();}
+	if (42 < 42) {error();}
+
+	if (!(42 <= 46)) {error();}
+	if (46 <= 42) {error();}
+	if (!(42 <= 42)) {error();}
+
+	if (42 > 46) {error();}
+	if (!(46 > 42)) {error();}
+	if (42 > 42) {error();}
+
+	if (42 >= 46) {error();}
+	if (!(46 >= 42)) {error();}
+	if (!(42 >= 42)) {error();}
+
+	if (!(42 == 42)) {error();}
+	if (42 == 46) {error();}
+	if (46 == 42) {error();}
+
+	if (!(true == true)) {error();}
+	if (!(false == false)) {error();}
+	if (true == false) {error();}
+	if (false == true) {error();}
+
+	if (42 != 42) {error();}
+	if (!(42 != 46)) {error();}
+	if (!(46 != 42)) {error();}
+
+	if (true != true) {error();}
+	if (false != false) {error();}
+	if (!(true != false)) {error();}
+	if (!(false != true)) {error();}
+
+	if (!(true && true)) {error();}
+	if (true && false) {error();}
+	if (false && true) {error();}
+	if (false && false) {error();}
+	if (btrue() && false) {error();} // it is OK not to detect this if's condition value at compile time, because left side of ... && false may have side effects, nontheless a warning would be appreciated
+	if (false && btrue()) {error();}
+
+	if (!(true || true)) {error();}
+	if (!(true || false)) {error();}
+	if (!(false || true)) {error();}
+	if (false || false) {error();}
+	// if (!(bfalse() || true)) {error();} // it is OK not to detect this if's condition value at compile time, because left side of ... || true may have side effects, nontheless a warning would be appreciated
+	if (!(true || bfalse())) {error();}
+
+	else return 0;
+}
+
+int i0() { return 0; }
+int i2() { return 2; }
+int i4() { return 4; }
+int i11() { return 11; }
+int i42() { return 42; }
+int i46() { return 46; }
+int i184() { return 184; }
+
+string sabc() { return "abc"; }
+string sabcabd() { return "abcabd"; }
+string sabcd() { return "abcd"; }
+string sabd() { return "abd"; }
+
+boolean btrue() { return true; }
+boolean bfalse() { return false; }
+
+void check_runtime() {
+
+	if (i4() + i42() != i46()) error();
+
+	if (i46() - i4() != i42()) error();
+	if (i46() * i4() != i184()) error();
+	if (i46() / i4() != i11()) error();
+	if (i46() % i4() != i2()) error();
+
+	if (!(i42() < i46())) error();
+	if (i46() < i42()) error();
+	if (i42() < i42()) error();
+
+
+	if (!(i42() <= i46())) error();
+	if (i46() <= i42()) error();
+	if (!(i42() <= i42())) error();
+
+	if (i42() > i46()) error();
+	if (!(i46() > i42())) error();
+	if (i42() > i42()) error();
+
+	if (i42() >= i46()) error();
+	if (!(i46() >= i42())) error();
+	if (!(i42() >= i42())) error();
+
+	if (!(i42() == i42())) error();
+	if (i42() == i46()) error();
+	if (i46() == i42()) error();
+
+	if (!(btrue() == btrue())) error();
+	if (!(bfalse() == bfalse())) error();
+	if (btrue() == bfalse()) error();
+	if (bfalse() == btrue()) error();
+
+	if (i42() != i42()) error();
+	if (!(i42() != i46())) error();
+	if (!(i46() != i42())) error();
+
+	if (btrue() != btrue()) error();
+	if (bfalse() != bfalse()) error();
+	if (!(btrue() != bfalse())) error();
+	if (!(bfalse() != btrue())) error();
+
+	if (!(btrue() && btrue())) error();
+	if (btrue() && bfalse()) error();
+	if (bfalse() && btrue()) error();
+	if (bfalse() && bfalse()) error();
+
+	if (!(btrue() || btrue())) error();
+	if (!(btrue() || bfalse())) error();
+	if (!(bfalse() || btrue())) error();
+	if (bfalse() || bfalse()) error();
+}

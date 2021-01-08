@@ -175,8 +175,10 @@ void Instr::print() {
         std::cerr << "\tjump " + args[0].getVal() << std::endl;
     } else if (instrName == INSTR_IF_NOT_JUMP) {
         std::cerr << "\tif !" + args[0].getVal() + " then jump " + args[1].getVal() << std::endl;
+    } else if (instrName == INSTR_IF_JUMP) {
+        std::cerr << "\tif " + args[0].getVal() + " then jump " + args[1].getVal() << std::endl;
     } else {
-        std::cerr << "error"  << std::endl;
+        std::cerr << "error" << std::endl;
     }
 }
 
@@ -224,6 +226,7 @@ void QuadrupleBlock::addInstrBeforeJump(Instr singleInstr) {
     if (lastInstr.getInstrName() == INSTR_RETURN ||
         lastInstr.getInstrName() == INSTR_JUMP ||
         lastInstr.getInstrName() == INSTR_IF_NOT_JUMP ||
+        lastInstr.getInstrName() == INSTR_IF_JUMP ||
         (lastInstr.getInstrName() == INSTR_CALL_NO_RET &&
          std::prev(lastInstr.getArgs()->end())->getVal() == RUN_TIME_ERROR)) {
         instr.pop_back();

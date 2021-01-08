@@ -10,22 +10,20 @@ extern void fun_printString(const char *str) {
     printf("%s\n", str);
 }
 
+extern int fun_readInt() {
+    int i;
+    scanf("%d", &i);
+    return i;
+}
+
 extern char *fun_readString() {
     char *line = malloc(256);
-    size_t read, len;
-    read = getline(&line, &len, stdin);
-    line[read - 1] = '\0';
-    char *str = malloc(read);
+    scanf("%s", line);
+    line[strlen(line)] = '\0';
+    char *str = malloc(strlen(line));
     strcpy(str, line);
     free(line);
     return str;
-}
-
-extern int fun_readInt() {
-    char *str = fun_readString();
-    int i = atoi(str);
-    free(str);
-    return i;
 }
 
 extern void fun_error() {

@@ -15,7 +15,7 @@ main:
 	movl $36, %eax
 	movl %eax, -20(%ebp)
 	movl -20(%ebp), %eax
-	negl %eax
+	neg %eax
 	movl %eax, -24(%ebp)
 	movl -24(%ebp), %eax
 	movl %eax, -28(%ebp)

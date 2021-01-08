@@ -7,7 +7,7 @@ main:
 	movl $1, %eax
 	movl %eax, -4(%ebp)
 	movl -4(%ebp), %eax
-	negl %eax
+	neg %eax
 	movl %eax, -8(%ebp)
 	push -8(%ebp)
 	call fun_printInt

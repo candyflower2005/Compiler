@@ -5,7 +5,6 @@ main:
 	movl %esp, %ebp
 	subl $16, %esp
 	call fun_foo
-	add $0, %esp
 	movl %eax, -4(%ebp)
 	movl -4(%ebp), %eax
 	movl %eax, -8(%ebp)

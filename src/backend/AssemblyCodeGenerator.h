@@ -14,6 +14,9 @@ class AssemblyCodeGenerator {
     std::unordered_map<Ident, std::string> tempToString;
     std::unordered_set<Ident> stringRegs;
     std::map<Ident, FunctionDef *> funDefs;
+    // ins[blockame] = [in[instr_i]]
+    std::unordered_map<Ident, std::vector<std::unordered_set<Ident>>> ins;
+    std::unordered_map<Ident, std::vector<std::unordered_set<Ident>>> outs;
 
     std::vector<std::string>
     generateFunCode(std::vector<General::QuadrupleBlock *>::iterator &blockIt,
@@ -30,7 +33,7 @@ class AssemblyCodeGenerator {
 
 public:
     AssemblyCodeGenerator(Optimizer opt) : blocks(opt.getBlocks()), blocksMap(opt.getBlocksMap()),
-                                           funDefs(opt.funDefs) {}
+                                           funDefs(opt.funDefs), ins(opt.ins), outs(opt.outs) {}
 
     std::string generateCode();
 };

@@ -61,7 +61,7 @@ void Optimizer::createGraph() {
             std::cerr << "(" << blockLabel << ", " << jumpTarget << ")" << std::endl;
             edges_out[blockLabel].push_back(jumpTarget);
             edges_in[jumpTarget].push_back(blockLabel);
-        } else if (instrName == INSTR_IF_NOT_JUMP) {
+        } else if (instrName == INSTR_IF_NOT_JUMP || instrName == INSTR_IF_JUMP) {
             auto jumpTarget = (*lastInstr->getArgs())[1].getVal();
             edges_out[blockLabel].push_back(jumpTarget);
             edges_in[jumpTarget].push_back(blockLabel);
@@ -99,7 +99,9 @@ void Optimizer::concatBlocks() {
         for (auto &b: *blocksMap) {
             if (b.second->listInstr()->empty()) {
                 Ident label = b.first;
-
+                if (label.rfind("fun", 0) == 0) {
+                    continue;
+                }
                 blocksMap->erase(label);
                 auto blockIt = blocks->begin();
                 while ((*blockIt)->getLabel() != label) {
@@ -110,7 +112,7 @@ void Optimizer::concatBlocks() {
 
                 for (auto &bl: *blocks) {
                     for (auto &instr: *bl->listInstr()) {
-                        if (instr.getInstrName() == INSTR_IF_NOT_JUMP) {
+                        if (instr.getInstrName() == INSTR_IF_NOT_JUMP || instr.getInstrName() == INSTR_IF_JUMP) {
                             auto &targetArg = (*instr.getArgs())[1];
                             if (targetArg.getVal() == label) {
                                 targetArg.changeVal(nextBlockLabel);
@@ -155,6 +157,10 @@ void Optimizer::computeDataFlow() {
         ins[blockName] = std::vector<std::unordered_set<Ident>>();
         outs[blockName] = std::vector<std::unordered_set<Ident>>();
         for (int i = 0; i < b.second->listInstr()->size(); i++) {
+            ins[blockName].push_back(std::unordered_set<Ident>());
+            outs[blockName].push_back(std::unordered_set<Ident>());
+        }
+        if (b.second->listInstr()->empty()) {
             ins[blockName].push_back(std::unordered_set<Ident>());
             outs[blockName].push_back(std::unordered_set<Ident>());
         }
@@ -224,17 +230,17 @@ void Optimizer::computeDataFlow() {
         int cnt = 0;
         for (auto &b: *blocksMap) {
             Ident blockName = b.first;
-            std::cerr << "Block " << blockName << ":" << std::endl;
-            std::cerr << "\tin[0]:";
-            for (auto &el: ins[blockName][0]) {
-                std::cerr << " " << el;
-            }
-            std::cerr << std::endl;
-            std::cerr << "\tout[-1]:";
-            for (auto &el: outs[blockName][outs[blockName].size() - 1]) {
-                std::cerr << " " << el;
-            }
-            std::cerr << std::endl;
+//            std::cerr << blockName << std::endl;
+//            std::cerr << "Block " << blockName << ":" << std::endl;
+//            std::cerr << "\tin[0]:";
+//            for (auto &el: ins[blockName][0]) {
+//                std::cerr << " " << el;
+//            }
+//            std::cerr << std::endl;
+//
+//            for (auto &el: outs[blockName][outs[blockName].size() - 1]) {
+//                std::cerr << " " << el;
+//            }
             if (ins[blockName][0] != curr_ins[cnt] || outs[blockName][outs[blockName].size() - 1] != curr_outs[cnt]) {
                 diff = true;
             }

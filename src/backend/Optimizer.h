@@ -12,10 +12,6 @@ class Optimizer {
     std::unordered_map<Ident, std::vector<Ident>> edges_out;
     std::unordered_map<Ident, std::vector<Ident>> edges_in;
 
-    // ins[blockame] = [in[instr_i]]
-    std::unordered_map<Ident, std::vector<std::unordered_set<Ident>>> ins;
-    std::unordered_map<Ident, std::vector<std::unordered_set<Ident>>> outs;
-
     void createGraph();
 
     void eliminatePhi();
@@ -36,6 +32,10 @@ public:
     void optimize();
 
     std::map<Ident, FunctionDef *> funDefs;
+
+    std::unordered_map<Ident, std::vector<std::unordered_set<Ident>>> ins;
+
+    std::unordered_map<Ident, std::vector<std::unordered_set<Ident>>> outs;
 };
 
 

@@ -18,7 +18,7 @@ main:
 	movl $23, %eax
 	movl %eax, -12(%ebp)
 	movl -12(%ebp), %eax
-	negl %eax
+	neg %eax
 	movl %eax, -16(%ebp)
 	movl -16(%ebp), %eax
 	movl %eax, -20(%ebp)
@@ -67,7 +67,7 @@ main:
 	push -68(%ebp)
 	call fun_printInt
 	add $4, %esp
-	movl $79, %eax
+	movl $78, %eax
 	movl %eax, -72(%ebp)
 	movl $3, %eax
 	movl %eax, -76(%ebp)
@@ -98,8 +98,10 @@ main:
 	movl %eax, -104(%ebp)
 	movl -92(%ebp), %eax
 	movl -104(%ebp), %ebx
+	xor %ecx, %ecx
 	cmp %ebx, %eax
-	setg %al
+	setg %cl
+	mov %ecx, %eax
 	movl %eax, -108(%ebp)
 	push -108(%ebp)
 	call fun_printBool
@@ -123,8 +125,10 @@ main:
 	movl %eax, -132(%ebp)
 	movl -120(%ebp), %eax
 	movl -132(%ebp), %ebx
+	xor %ecx, %ecx
 	cmp %ebx, %eax
-	setle %al
+	setle %cl
+	mov %ecx, %eax
 	movl %eax, -136(%ebp)
 	push -136(%ebp)
 	call fun_printBool

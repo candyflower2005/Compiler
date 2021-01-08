@@ -16,6 +16,7 @@ const static std::string INSTR_CALL_NO_RET = "call_no_ret"; // args {fun_label, 
 const static std::string INSTR_RETURN = "return";
 const static std::string INSTR_JUMP = "jump";
 const static std::string INSTR_IF_NOT_JUMP = "if_not_jump";
+const static std::string INSTR_IF_JUMP = "if_jump";
 
 const static std::string OP_NULL = "null";
 const static std::string OP_ASSIGNMENT = "assignment";

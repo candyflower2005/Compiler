@@ -8,7 +8,6 @@ main:
 	movl %esp, %ebp
 	subl $4, %esp
 	call fun_foo
-	add $0, %esp
 	movl $0, %eax
 	movl %eax, -4(%ebp)
 	movl -4(%ebp),  %eax

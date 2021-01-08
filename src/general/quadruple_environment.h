@@ -91,6 +91,8 @@ namespace General {
         FunctionDef *getFunctionDef(Ident funName);
 
         void print();
+
+        void setVarVal(Loc loc, Ident ident);
     };
 }
 

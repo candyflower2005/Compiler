@@ -341,7 +341,6 @@ void QuadrupleGenerator::visitEApp(EApp *p) {
 void QuadrupleGenerator::visitEVar(EVar *p) {
     auto res = General::Register(env.getFreshTemp());
     auto varVal = General::Register(env.getVarValue(env.getVarAddress(p->ident_)));
-    // TODO to generuje dodatkową instrukcję kopiowania, powino zostać usunięte w etapie optymalizacji
     auto instr = General::Instr(INSTR_ASSIGNMENT, OP_ASSIGNMENT, res, argsType{varVal});
     currBlock->addInstr(instr);
 }
@@ -438,37 +437,130 @@ void QuadrupleGenerator::visitERel(ERel *p) {
 }
 
 void QuadrupleGenerator::visitEAnd(EAnd *p) {
-    p->expr_1->accept(this);
-    auto arg1 = env.getRecentRegister();
-    p->expr_2->accept(this);
-    auto arg2 = env.getRecentRegister();
-
-    // TODO zmienić and i or na (albo i nie, bo to jest trudne do zaimplementowania, jak już, to dla cond i condelse)
     /*
-     if not w1 goto Lfalse
-     if not w2 goto Lfalse
-     code for Ltrue
-
-     if w1 goto Ltrue
-     if w2 goto Ltrue
-     code for Lfalse
-
+     currBlock:
+        w1 = expr1.eval()
+        if not w1 goto Lfalse
+     secondCond:
+        w2 = expr2.eval()
+        if not w2 goto Lfalse
+     Ltrue:
+        ...
+        jump Rest
+     Lfalse:
+        ...
+     Rest:
      */
+    auto secondCondLabel = env.getFreshLabel();
+    auto trueLabel = env.getFreshLabel("LTrue");
+    auto falseLabel = env.getFreshLabel("LFalse");
+    auto restLabel = env.getFreshLabel();
+    auto secondCondBlock = new General::QuadrupleBlock(General::NORMAL, secondCondLabel);
+    auto trueBlock = new General::QuadrupleBlock(General::NORMAL, trueLabel);
+    auto falseBlock = new General::QuadrupleBlock(General::NORMAL, falseLabel);
+    auto restBlock = new General::QuadrupleBlock(General::NORMAL, restLabel);
 
-    auto res = General::Register(env.getFreshTemp());
-    auto instr = General::Instr(INSTR_ASSIGNMENT, OP_AND, res, argsType{arg1, arg2});
-    currBlock->addInstr(instr);
+    p->expr_1->accept(this);
+    auto &lastInstr = (*currBlock->listInstr())[currBlock->listInstr()->size() - 1];
+    lastInstr.setUsedInJump(true);
+    auto arg1 = env.getRecentRegister();
+
+    auto firstCondJump = General::Instr(INSTR_IF_NOT_JUMP, OP_NULL, General::Type(""), argsType{arg1, falseLabel});
+    currBlock->addInstr(firstCondJump);
+
+    env.addNewBlock(secondCondLabel, secondCondBlock);
+    General::QuadrupleEnvironment &localEnv(env);
+    QuadrupleGenerator newQGenCond2(p->expr_2, localEnv, secondCondBlock);
+    auto &secondlastInstr = (*newQGenCond2.currBlock->listInstr())[newQGenCond2.currBlock->listInstr()->size() - 1];
+    secondlastInstr.setUsedInJump(true);
+    auto arg2 = env.getRecentRegister();
+    auto secondCondJump = General::Instr(INSTR_IF_NOT_JUMP, OP_NULL, General::Type(""), argsType{arg2, falseLabel});
+    newQGenCond2.currBlock->addInstr(secondCondJump);
+
+    env.addNewBlock(trueLabel, trueBlock);
+    auto trueTemp = env.getFreshTemp();
+    auto trueAssign = General::Instr(INSTR_ASSIGNMENT, OP_ASSIGNMENT, General::Register(trueTemp),
+                                     argsType{General::Bool(true)});
+    auto trueJump = General::Instr(INSTR_JUMP, OP_NULL, General::Type(""), argsType{restLabel});
+    trueBlock->addInstr(trueAssign);
+    trueBlock->addInstr(trueJump);
+
+    env.addNewBlock(falseLabel, falseBlock);
+    auto falseTemp = env.getFreshTemp();
+    auto falseAssign = General::Instr(INSTR_ASSIGNMENT, OP_ASSIGNMENT, General::Register(falseTemp),
+                                      argsType{General::Bool(false)});
+    falseBlock->addInstr(falseAssign);
+
+    env.addNewBlock(restLabel, restBlock);
+    currBlock = restBlock;
+    auto resTemp = env.getFreshTemp();
+    auto phiInstr = General::Instr(INSTR_PHI, OP_NULL, General::Register(resTemp),
+                                   argsType{trueLabel, trueTemp, falseLabel, falseTemp});
+    restBlock->addInstr(phiInstr);
+
+    //(*varValues)[it.first] = newTemp;
+
+// TODO zmienić and i or na (albo i nie, bo to jest trudne do zaimplementowania, jak już, to dla cond i condelse)
+/*
+ if not w1 goto Lfalse
+ if not w2 goto Lfalse
+ code for Ltrue
+
+ if w1 goto Ltrue
+ if w2 goto Ltrue
+ code for Lfalse
+
+ */
 }
 
 void QuadrupleGenerator::visitEOr(EOr *p) {
-    p->expr_1->accept(this);
-    auto arg1 = env.getRecentRegister();
-    p->expr_2->accept(this);
-    auto arg2 = env.getRecentRegister();
+    auto secondCondLabel = env.getFreshLabel();
+    auto trueLabel = env.getFreshLabel("LTrue");
+    auto falseLabel = env.getFreshLabel("LFalse");
+    auto restLabel = env.getFreshLabel();
+    auto secondCondBlock = new General::QuadrupleBlock(General::NORMAL, secondCondLabel);
+    auto trueBlock = new General::QuadrupleBlock(General::NORMAL, trueLabel);
+    auto falseBlock = new General::QuadrupleBlock(General::NORMAL, falseLabel);
+    auto restBlock = new General::QuadrupleBlock(General::NORMAL, restLabel);
 
-    auto res = General::Register(env.getFreshTemp());
-    auto instr = General::Instr(INSTR_ASSIGNMENT, OP_OR, res, argsType{arg1, arg2});
-    currBlock->addInstr(instr);
+    p->expr_1->accept(this);
+    auto &lastInstr = (*currBlock->listInstr())[currBlock->listInstr()->size() - 1];
+    lastInstr.setUsedInJump(true);
+    auto arg1 = env.getRecentRegister();
+
+    auto firstCondJump = General::Instr(INSTR_IF_JUMP, OP_NULL, General::Type(""), argsType{arg1, trueLabel});
+    currBlock->addInstr(firstCondJump);
+
+    env.addNewBlock(secondCondLabel, secondCondBlock);
+    General::QuadrupleEnvironment &localEnv(env);
+    QuadrupleGenerator newQGenCond2(p->expr_2, localEnv, secondCondBlock);
+    auto &secondlastInstr = (*newQGenCond2.currBlock->listInstr())[newQGenCond2.currBlock->listInstr()->size() - 1];
+    secondlastInstr.setUsedInJump(true);
+    auto arg2 = env.getRecentRegister();
+    auto secondCondJump = General::Instr(INSTR_IF_JUMP, OP_NULL, General::Type(""), argsType{arg2, trueLabel});
+    newQGenCond2.currBlock->addInstr(secondCondJump);
+
+    env.addNewBlock(falseLabel, falseBlock);
+    auto falseTemp = env.getFreshTemp();
+    auto falseAssign = General::Instr(INSTR_ASSIGNMENT, OP_ASSIGNMENT, General::Register(falseTemp),
+                                      argsType{General::Bool(false)});
+    auto falseJump = General::Instr(INSTR_JUMP, OP_NULL, General::Type(""), argsType{restLabel});
+    falseBlock->addInstr(falseAssign);
+    falseBlock->addInstr(falseJump);
+
+
+    env.addNewBlock(trueLabel, trueBlock);
+    auto trueTemp = env.getFreshTemp();
+    auto trueAssign = General::Instr(INSTR_ASSIGNMENT, OP_ASSIGNMENT, General::Register(trueTemp),
+                                     argsType{General::Bool(true)});
+    trueBlock->addInstr(trueAssign);
+
+    env.addNewBlock(restLabel, restBlock);
+    currBlock = restBlock;
+    auto resTemp = env.getFreshTemp();
+    auto phiInstr = General::Instr(INSTR_PHI, OP_NULL, General::Register(resTemp),
+                                   argsType{trueLabel, trueTemp, falseLabel, falseTemp});
+    restBlock->addInstr(phiInstr);
 }
 
 void QuadrupleGenerator::visitPlus(Plus *p) {

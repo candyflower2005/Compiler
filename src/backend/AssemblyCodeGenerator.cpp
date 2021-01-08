@@ -64,10 +64,10 @@ void AssemblyCodeGenerator::handleCall(General::Instr &currInstr, std::vector<st
         tempToStack[currInstr.getRes()->getVal()] = newAddr;
         assInstr.emplace_back("movl %eax, " + newAddr);
         firstFree += 4;
-    }
 
-    if (funDefs[args[0].getVal()]->getFunType().print() == "string") {
-        stringRegs.insert(currInstr.getRes()->getVal());
+        if (funDefs[args[0].getVal()]->getFunType().print() == "string") {
+            stringRegs.insert(currInstr.getRes()->getVal());
+        }
     }
 }
 
@@ -80,7 +80,22 @@ void AssemblyCodeGenerator::handleJump(General::Instr &currInstr, General::Instr
 
     auto target = (*currInstr.getArgs())[1].getVal();
 
-    auto &jumpVal = (*lastInstr.getArgs())[0];
+    if (&currInstr == &lastInstr || lastInstr.getInstrName() == INSTR_CALL_RET) {
+        auto jumpVal = (*currInstr.getArgs())[0];
+        auto t1 = tempToStack[jumpVal.getVal()];
+
+        assInstr.emplace_back("movl " + t1 + ", %eax");
+        assInstr.emplace_back("cmpl $1, %eax");
+        if (currInstr.getInstrName() == INSTR_IF_NOT_JUMP) {
+            assInstr.emplace_back("jne " + target);
+        }
+        if (currInstr.getInstrName() == INSTR_IF_JUMP) {
+            assInstr.emplace_back("je " + target);
+        }
+        return;
+    }
+
+    auto jumpVal = (*lastInstr.getArgs())[0];
     auto t1 = tempToStack[jumpVal.getVal()];
 
     if (jumpVal.print() == "bool") {
@@ -90,47 +105,76 @@ void AssemblyCodeGenerator::handleJump(General::Instr &currInstr, General::Instr
     assInstr.emplace_back("movl " + t1 + ", %eax");
     if (lastInstr.getOpName() == OP_ASSIGNMENT) {
         assInstr.emplace_back("cmp $1, %eax");
-        assInstr.emplace_back("jne " + target);
+        if (currInstr.getInstrName() == INSTR_IF_NOT_JUMP) {
+            assInstr.emplace_back("jne " + target);
+        }
+        if (currInstr.getInstrName() == INSTR_IF_JUMP) {
+            assInstr.emplace_back("je " + target);
+        }
         return;
     }
     if (lastInstr.getOpName() == OP_NOT) {
         assInstr.emplace_back("cmp $0, %eax");
-        assInstr.emplace_back("jne " + target);
+        if (currInstr.getInstrName() == INSTR_IF_NOT_JUMP) {
+            assInstr.emplace_back("jne " + target);
+        }
+        if (currInstr.getInstrName() == INSTR_IF_JUMP) {
+            assInstr.emplace_back("je " + target);
+        }
         return;
     }
 
     auto t2 = tempToStack[(*lastInstr.getArgs())[1].getVal()];
     assInstr.emplace_back("movl " + t2 + ", %ebx");
 
-    if (lastInstr.getOpName() == OP_OR) {
-        assInstr.emplace_back("orb %ebx, %eax");
-        assInstr.emplace_back("cmpl $1, %eax");
-        assInstr.emplace_back("jne " + target);
-    }
-    if (lastInstr.getOpName() == OP_AND) {
-        assInstr.emplace_back("andl %ebx, %eax");
-        assInstr.emplace_back("cmpl $1, %eax");
-        assInstr.emplace_back("jne " + target);
-    }
-
     assInstr.emplace_back("cmpl %ebx, %eax");
     if (lastInstr.getOpName() == OP_EQU) {
-        assInstr.emplace_back("jne " + target);
+        if (currInstr.getInstrName() == INSTR_IF_NOT_JUMP) {
+            assInstr.emplace_back("jne " + target);
+        }
+        if (currInstr.getInstrName() == INSTR_IF_JUMP) {
+            assInstr.emplace_back("je " + target);
+        }
     }
     if (lastInstr.getOpName() == OP_NE) {
-        assInstr.emplace_back("je " + target);
+        if (currInstr.getInstrName() == INSTR_IF_NOT_JUMP) {
+            assInstr.emplace_back("je " + target);
+        }
+        if (currInstr.getInstrName() == INSTR_IF_JUMP) {
+            assInstr.emplace_back("jne " + target);
+        }
     }
     if (lastInstr.getOpName() == OP_GE) {
-        assInstr.emplace_back("jl " + target);
+        if (currInstr.getInstrName() == INSTR_IF_NOT_JUMP) {
+            assInstr.emplace_back("jl " + target);
+        }
+        if (currInstr.getInstrName() == INSTR_IF_JUMP) {
+            assInstr.emplace_back("jge " + target);
+        }
     }
     if (lastInstr.getOpName() == OP_GTH) {
-        assInstr.emplace_back("jle " + target);
+        if (currInstr.getInstrName() == INSTR_IF_NOT_JUMP) {
+            assInstr.emplace_back("jle " + target);
+        }
+        if (currInstr.getInstrName() == INSTR_IF_JUMP) {
+            assInstr.emplace_back("jg " + target);
+        }
     }
     if (lastInstr.getOpName() == OP_LE) {
-        assInstr.emplace_back("jg " + target);
+        if (currInstr.getInstrName() == INSTR_IF_NOT_JUMP) {
+            assInstr.emplace_back("jg " + target);
+        }
+        if (currInstr.getInstrName() == INSTR_IF_JUMP) {
+            assInstr.emplace_back("jle " + target);
+        }
     }
     if (lastInstr.getOpName() == OP_LTH) {
-        assInstr.emplace_back("jge " + target);
+        if (currInstr.getInstrName() == INSTR_IF_NOT_JUMP) {
+            assInstr.emplace_back("jge " + target);
+        }
+        if (currInstr.getInstrName() == INSTR_IF_JUMP) {
+            assInstr.emplace_back("jl " + target);
+        }
     }
 }
 
@@ -223,7 +267,8 @@ void AssemblyCodeGenerator::handleAss(General::Instr &currInstr, std::vector<std
     if (currInstr.getOpName() == OP_GE) {
         assInstr.emplace_back("xor %ecx, %ecx");
         assInstr.emplace_back("cmp %ebx, %eax");
-        assInstr.emplace_back("setge %eax");
+        assInstr.emplace_back("setge %cl");
+        assInstr.emplace_back("mov %ecx, %eax");
     }
     if (currInstr.getOpName() == OP_LTH) {
         assInstr.emplace_back("xor %ecx, %ecx");
@@ -293,11 +338,9 @@ AssemblyCodeGenerator::generateFunCode(std::vector<General::QuadrupleBlock *>::i
     auto instrIt = b->listInstr()->begin();
 
     int numParams = 0;
-    while (instrIt->getOpName() == OP_PARAM) {
+    while (instrIt != b->listInstr()->end() && instrIt->getOpName() == OP_PARAM) {
         numParams++;
         tempToStack[instrIt->getRes()->getVal()] = std::to_string(4 + 4 * numParams) + "(%ebp)";
-        std::cerr << instrIt->getRes()->getVal() << ", ustawiam adres " << tempToStack[instrIt->getRes()->getVal()]
-                  << std::endl;
         instrIt++;
     }
 
@@ -307,6 +350,7 @@ AssemblyCodeGenerator::generateFunCode(std::vector<General::QuadrupleBlock *>::i
         if (b->getLabel().rfind("fun", 0) != 0) {
             rest.emplace_back(b->getLabel() + ":");
         }
+        std::cerr << std::endl;
         for (instrIt = b->listInstr()->begin(); instrIt != b->listInstr()->end(); ++instrIt) {
             std::cerr << instrIt->getInstrName() << std::endl;
             if (instrIt->getInstrName() == INSTR_RETURN) {
@@ -315,9 +359,11 @@ AssemblyCodeGenerator::generateFunCode(std::vector<General::QuadrupleBlock *>::i
             if (instrIt->getInstrName() == INSTR_CALL_NO_RET || instrIt->getInstrName() == INSTR_CALL_RET) {
                 handleCall(*instrIt, rest, firstFree);
             }
-            if (instrIt->getInstrName() == INSTR_JUMP || instrIt->getInstrName() == INSTR_IF_NOT_JUMP) {
-                auto lastInstr = instrIt - 1;
-                if (instrIt->getInstrName() == INSTR_IF_NOT_JUMP) {
+            if (instrIt->getInstrName() == INSTR_JUMP || instrIt->getInstrName() == INSTR_IF_NOT_JUMP ||
+                instrIt->getInstrName() == INSTR_IF_JUMP) {
+                auto lastInstr = instrIt;
+                if ((instrIt->getInstrName() == INSTR_IF_NOT_JUMP || instrIt->getInstrName() == INSTR_IF_JUMP) &&
+                    lastInstr != b->listInstr()->begin()) {
                     while (!lastInstr->isUsedInJump()) {
                         lastInstr--;
                     }
