@@ -1,9 +1,23 @@
 # The set of languages for which implicit dependencies are needed:
 set(CMAKE_DEPENDS_LANGUAGES
+  "C"
   "CXX"
   )
 # The set of files for implicit dependencies of each language:
+set(CMAKE_DEPENDS_CHECK_C
+  "/home/cukiereczek/Workspace/MRJP/Latte/lib/runtime.c" "/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/CMakeFiles/Latte.dir/lib/runtime.c.o"
+  )
+set(CMAKE_C_COMPILER_ID "GNU")
+
+# The include file search paths:
+set(CMAKE_C_TARGET_INCLUDE_PATH
+  "../src/backend"
+  "../src/frontend"
+  "../src/general"
+  "../src/grammar"
+  )
 set(CMAKE_DEPENDS_CHECK_CXX
+  "/home/cukiereczek/Workspace/MRJP/Latte/src/backend/AssemblyCodeGenerator.cpp" "/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/CMakeFiles/Latte.dir/src/backend/AssemblyCodeGenerator.cpp.o"
   "/home/cukiereczek/Workspace/MRJP/Latte/src/backend/Optimizer.cpp" "/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/CMakeFiles/Latte.dir/src/backend/Optimizer.cpp.o"
   "/home/cukiereczek/Workspace/MRJP/Latte/src/backend/QuadrupleGenerator.cpp" "/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/CMakeFiles/Latte.dir/src/backend/QuadrupleGenerator.cpp.o"
   "/home/cukiereczek/Workspace/MRJP/Latte/src/frontend/DeclFrontend.cpp" "/home/cukiereczek/Workspace/MRJP/Latte/cmake-build-debug/CMakeFiles/Latte.dir/src/frontend/DeclFrontend.cpp.o"

@@ -36,7 +36,7 @@ const static std::string OP_GE = ">=";
 const static std::string OP_EQU = "==";
 const static std::string OP_NE = "!=";
 
-const static std::string RUN_TIME_ERROR = "fun_run_time_error";
+const static std::string RUN_TIME_ERROR = "runTimeError";
 
 typedef enum {
     CANT_RETURN,
@@ -61,6 +61,8 @@ namespace General {
         Type() {};
 
         Type(std::string val) : val(val) {};
+
+        void changeVal(std::string newVal);
 
         bool same(Type &);
 
@@ -180,19 +182,28 @@ namespace General {
         std::string opName;
         Type result; // either 'Register' or constant of type 'Type'
         std::vector<Type> args;
+        bool usedInJump = false;
 
     public:
         Instr(std::string instrName, std::string opName, Type result,
-              std::vector<Type> args) : instrName(std::move(instrName)), opName(std::move(opName)),
-                                        result(std::move(result)), args(std::move(args)) {}
+              std::vector<Type> args) : instrName(std::move(instrName)),
+                                        opName(std::move(opName)),
+                                        result(std::move(result)),
+                                        args(std::move(args)) {}
 
         void print();
 
         std::string &getInstrName();
 
+        std::string &getOpName();
+
         std::vector<Type> *getArgs();
 
         Type *getRes();
+
+        bool setUsedInJump(bool used);
+
+        bool isUsedInJump();
     };
 
     class QuadrupleBlock {
@@ -203,7 +214,7 @@ namespace General {
     public:
         QuadrupleBlock(blockType type, Ident label) : type(type), label(std::move(label)) {}
 
-        void addInstr(Instr singleInstr);
+        void addInstr(Instr singleInstr, bool start=false);
 
         void addInstrBeforeJump(Instr singleInstr);
 

@@ -78,8 +78,27 @@ std::map<Ident, FunctionDef *> General::QuadrupleEnvironment::getFunDefs() {
     return funDefs;
 }
 
+bool General::QuadrupleEnvironment::replaceOccurrence(Ident blockName, Ident oldTemp, Ident newTemp) {
+    auto instrList = (*blocksMap)[blockName]->listInstr();
+    for (auto &currInstr: *instrList) {
+        if (currInstr.getRes()->getVal() == oldTemp) {
+            return true;
+        }
+        if (currInstr.getInstrName() == INSTR_PHI) {
+            continue;
+        }
+        for (auto &arg: *currInstr.getArgs()) {
+            if (arg.getVal() == oldTemp) {
+                arg.changeVal(newTemp);
+            }
+        }
+    }
+    return false;
+}
+
 void General::QuadrupleEnvironment::generatePhiInstr(Ident currBlock, General::QuadrupleEnvironment &env1, Ident label1,
-                                                     General::QuadrupleEnvironment &env2, Ident label2) {
+                                                     General::QuadrupleEnvironment &env2, Ident label2,
+                                                     Ident endpoint) {
     for (auto &it: *varValues) {
         Ident currTemp = it.second;
         Ident env1Temp = env1.getVarValue(it.first);
@@ -90,9 +109,33 @@ void General::QuadrupleEnvironment::generatePhiInstr(Ident currBlock, General::Q
         } else {
             Ident newTemp = getFreshTemp();
             auto res = General::Register(newTemp);
-            auto instr = General::Instr(INSTR_PHI, OP_NULL, res, argsType{label1, env1Temp, label2, env2Temp});
-            (*blocksMap)[currBlock]->addInstr(instr);
+            auto reg1 = General::Register(env1Temp), reg2 = General::Register(env2Temp);
+            auto labelArg1 = General::String(label1), labelArg2 = General::String(label2);
+            auto instr = General::Instr(INSTR_PHI, OP_NULL, res, argsType{labelArg1, reg1, labelArg2, reg2});
+            (*blocksMap)[currBlock]->addInstr(instr, true);
             (*varValues)[it.first] = newTemp;
+
+            auto blockIt = blocks->begin();
+            while ((*blockIt)->getLabel() != currBlock) {
+                blockIt++;
+            }
+
+            bool env1Def = false, env2Def = false;
+            while ((*blockIt)->getLabel() != endpoint) {
+                if (!env1Def) {
+                    env1Def = replaceOccurrence((*blockIt)->getLabel(), env1Temp, newTemp);
+                }
+                if (!env2Def) {
+                    env2Def = replaceOccurrence((*blockIt)->getLabel(), env2Temp, newTemp);
+                }
+                blockIt++;
+            }
+            if (!env1Def) {
+                env1Def = replaceOccurrence((*blockIt)->getLabel(), env1Temp, newTemp);
+            }
+            if (!env2Def) {
+                env2Def = replaceOccurrence((*blockIt)->getLabel(), env2Temp, newTemp);
+            }
         }
     }
 }

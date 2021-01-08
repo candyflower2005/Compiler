@@ -143,6 +143,60 @@ Latte/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Latte.dir/build.make CMakeFiles/Latte.dir/build
 .PHONY : Latte/fast
 
+lib/runtime.o: lib/runtime.c.o
+
+.PHONY : lib/runtime.o
+
+# target to build an object file
+lib/runtime.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Latte.dir/build.make CMakeFiles/Latte.dir/lib/runtime.c.o
+.PHONY : lib/runtime.c.o
+
+lib/runtime.i: lib/runtime.c.i
+
+.PHONY : lib/runtime.i
+
+# target to preprocess a source file
+lib/runtime.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Latte.dir/build.make CMakeFiles/Latte.dir/lib/runtime.c.i
+.PHONY : lib/runtime.c.i
+
+lib/runtime.s: lib/runtime.c.s
+
+.PHONY : lib/runtime.s
+
+# target to generate assembly for a file
+lib/runtime.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Latte.dir/build.make CMakeFiles/Latte.dir/lib/runtime.c.s
+.PHONY : lib/runtime.c.s
+
+src/backend/AssemblyCodeGenerator.o: src/backend/AssemblyCodeGenerator.cpp.o
+
+.PHONY : src/backend/AssemblyCodeGenerator.o
+
+# target to build an object file
+src/backend/AssemblyCodeGenerator.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Latte.dir/build.make CMakeFiles/Latte.dir/src/backend/AssemblyCodeGenerator.cpp.o
+.PHONY : src/backend/AssemblyCodeGenerator.cpp.o
+
+src/backend/AssemblyCodeGenerator.i: src/backend/AssemblyCodeGenerator.cpp.i
+
+.PHONY : src/backend/AssemblyCodeGenerator.i
+
+# target to preprocess a source file
+src/backend/AssemblyCodeGenerator.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Latte.dir/build.make CMakeFiles/Latte.dir/src/backend/AssemblyCodeGenerator.cpp.i
+.PHONY : src/backend/AssemblyCodeGenerator.cpp.i
+
+src/backend/AssemblyCodeGenerator.s: src/backend/AssemblyCodeGenerator.cpp.s
+
+.PHONY : src/backend/AssemblyCodeGenerator.s
+
+# target to generate assembly for a file
+src/backend/AssemblyCodeGenerator.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Latte.dir/build.make CMakeFiles/Latte.dir/src/backend/AssemblyCodeGenerator.cpp.s
+.PHONY : src/backend/AssemblyCodeGenerator.cpp.s
+
 src/backend/Optimizer.o: src/backend/Optimizer.cpp.o
 
 .PHONY : src/backend/Optimizer.o
@@ -584,6 +638,12 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Latte"
+	@echo "... lib/runtime.o"
+	@echo "... lib/runtime.i"
+	@echo "... lib/runtime.s"
+	@echo "... src/backend/AssemblyCodeGenerator.o"
+	@echo "... src/backend/AssemblyCodeGenerator.i"
+	@echo "... src/backend/AssemblyCodeGenerator.s"
 	@echo "... src/backend/Optimizer.o"
 	@echo "... src/backend/Optimizer.i"
 	@echo "... src/backend/Optimizer.s"

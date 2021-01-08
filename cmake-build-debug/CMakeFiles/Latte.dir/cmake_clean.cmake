@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/Latte.dir/lib/runtime.c.o"
+  "CMakeFiles/Latte.dir/src/backend/AssemblyCodeGenerator.cpp.o"
   "CMakeFiles/Latte.dir/src/backend/Optimizer.cpp.o"
   "CMakeFiles/Latte.dir/src/backend/QuadrupleGenerator.cpp.o"
   "CMakeFiles/Latte.dir/src/frontend/DeclFrontend.cpp.o"
@@ -20,6 +22,6 @@ file(REMOVE_RECURSE
 )
 
 # Per-language clean rules from dependency scanning.
-foreach(lang CXX)
+foreach(lang C CXX)
   include(CMakeFiles/Latte.dir/cmake_clean_${lang}.cmake OPTIONAL)
 endforeach()

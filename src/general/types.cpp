@@ -7,6 +7,10 @@ bool Type::same(Type &otherType) {
     return className == otherType.className;
 }
 
+void Type::changeVal(std::string newVal) {
+    val = newVal;
+}
+
 std::string &Type::print() {
     return className;
 }
@@ -111,7 +115,14 @@ OR::OR() {
     className = "or";
 }
 
-void QuadrupleBlock::addInstr(Instr singleInstr) {
+void QuadrupleBlock::addInstr(Instr singleInstr, bool start) {
+    if (start) {
+        std::vector<General::Instr> newInstr;
+        newInstr.push_back(singleInstr);
+        newInstr.insert(newInstr.end(), instr.begin(), instr.end());
+        instr = newInstr;
+        return;
+    }
     instr.push_back(singleInstr);
 }
 
@@ -127,8 +138,7 @@ void Instr::print() {
             std::cerr << "\t" << result.getVal() + " = " + args[0].getVal() + " " + opName + " " + args[1].getVal()
                       << std::endl;
         }
-    }
-    if (instrName == INSTR_PHI) {
+    } else if (instrName == INSTR_PHI) {
         std::cerr << "\t" << result.getVal() + " = phi(";
         for (auto it = args.begin(); it != args.end(); it += 2) {
             if (it != args.begin()) {
@@ -137,8 +147,7 @@ void Instr::print() {
             std::cerr << it->getVal() << ":" << (it + 1)->getVal();
         }
         std::cerr << ")" << std::endl;
-    }
-    if (instrName == INSTR_CALL_RET) {
+    } else if (instrName == INSTR_CALL_RET) {
         std::cerr << "\t" << result.getVal() << " = call " + args[0].getVal() + "(";
         for (size_t i = 1; i < args.size(); i++) {
             if (i > 1) {
@@ -147,8 +156,7 @@ void Instr::print() {
             std::cerr << args[i].getVal();
         }
         std::cerr << ")" << std::endl;
-    }
-    if (instrName == INSTR_CALL_NO_RET) {
+    } else if (instrName == INSTR_CALL_NO_RET) {
         std::cerr << "\tcall " + args[0].getVal() + "(";
         for (size_t i = 1; i < args.size(); i++) {
             if (i > 1) {
@@ -157,19 +165,18 @@ void Instr::print() {
             std::cerr << args[i].getVal();
         }
         std::cerr << ")" << std::endl;
-    }
-    if (instrName == INSTR_RETURN) {
+    } else if (instrName == INSTR_RETURN) {
         std::cerr << "\treturn";
         if (!args.empty()) {
             std::cerr << " " + args[0].getVal();
         }
         std::cerr << std::endl;
-    }
-    if (instrName == INSTR_JUMP) {
+    } else if (instrName == INSTR_JUMP) {
         std::cerr << "\tjump " + args[0].getVal() << std::endl;
-    }
-    if (instrName == INSTR_IF_NOT_JUMP) {
+    } else if (instrName == INSTR_IF_NOT_JUMP) {
         std::cerr << "\tif !" + args[0].getVal() + " then jump " + args[1].getVal() << std::endl;
+    } else {
+        std::cerr << "error"  << std::endl;
     }
 }
 
@@ -192,6 +199,10 @@ std::string &Instr::getInstrName() {
     return instrName;
 }
 
+std::string &Instr::getOpName() {
+    return opName;
+}
+
 std::vector<Type> *Instr::getArgs() {
     return &args;
 }
@@ -200,12 +211,21 @@ Type *Instr::getRes() {
     return &result;
 }
 
+bool Instr::setUsedInJump(bool used) {
+    usedInJump = used;
+}
+
+bool Instr::isUsedInJump() {
+    return usedInJump;
+}
+
 void QuadrupleBlock::addInstrBeforeJump(Instr singleInstr) {
     auto lastInstr = *std::prev(instr.end());
     if (lastInstr.getInstrName() == INSTR_RETURN ||
         lastInstr.getInstrName() == INSTR_JUMP ||
         lastInstr.getInstrName() == INSTR_IF_NOT_JUMP ||
-        (lastInstr.getInstrName() == INSTR_CALL_NO_RET && std::prev(lastInstr.getArgs()->end())->getVal() == RUN_TIME_ERROR)) {
+        (lastInstr.getInstrName() == INSTR_CALL_NO_RET &&
+         std::prev(lastInstr.getArgs()->end())->getVal() == RUN_TIME_ERROR)) {
         instr.pop_back();
         instr.push_back(singleInstr);
         instr.push_back(lastInstr);

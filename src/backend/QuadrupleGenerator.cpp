@@ -33,7 +33,7 @@ void QuadrupleGenerator::visitFnDef(FnDef *p) {
         env.setNewVarValue(newLoc, newTemp);
 
         auto res = General::Register(newTemp);
-        auto instr = General::Instr(INSTR_ASSIGNMENT, OP_PARAM, res, argsType{General::Int(i+1)});
+        auto instr = General::Instr(INSTR_ASSIGNMENT, OP_PARAM, res, argsType{General::Int(i + 1)});
         currBlock->addInstr(instr);
     }
 
@@ -65,8 +65,8 @@ void QuadrupleGenerator::visitBStmt(BStmt *p) {
     if (!dontCreateNewBlock) {
         auto newBStmtBlockLabel = env.getFreshLabel();
         auto newBStmtBlock = new General::QuadrupleBlock(General::NORMAL, newBStmtBlockLabel);
-        env.addNewBlock(newBStmtBlockLabel, newBStmtBlock);
 
+        env.addNewBlock(newBStmtBlockLabel, newBStmtBlock);
         General::QuadrupleEnvironment localEnv(env);
         QuadrupleGenerator newQGen(p->block_, localEnv, newBStmtBlock);
 
@@ -75,9 +75,8 @@ void QuadrupleGenerator::visitBStmt(BStmt *p) {
         env.addNewBlock(newBlockLabel, newCurrBlock);
         currBlock = newCurrBlock;
 
-        // TODO nadpisać env.varValues[loc] przez localEnv.varValues[loc] dla każdego loc należącego do env
         Ident lastBlockLabel = newQGen.currBlock->getLabel();
-        env.generatePhiInstr(newBlockLabel, localEnv, lastBlockLabel, localEnv, lastBlockLabel);
+        env.generatePhiInstr(newBlockLabel, localEnv, lastBlockLabel, localEnv, lastBlockLabel, newBlockLabel);
     } else {
         QuadrupleGenerator newQGen(p->block_, env, currBlock);
     }
@@ -210,98 +209,105 @@ void QuadrupleGenerator::visitVRet(VRet *p) {
 }
 
 void QuadrupleGenerator::visitCond(Cond *p) {
-    p->expr_->accept(this);
-
     auto currLabel = currBlock->getLabel();
     auto condLabel = env.getFreshLabel("if_body"), afterCondLabel = env.getFreshLabel("after_cond");
     auto newCondBlock = new General::QuadrupleBlock(General::NORMAL, condLabel);
     auto newAfterCondBlock = new General::QuadrupleBlock(General::NORMAL, afterCondLabel);
-    env.addNewBlock(condLabel, newCondBlock);
-    env.addNewBlock(afterCondLabel, newAfterCondBlock);
 
-    auto jumpTarget = General::Register(afterCondLabel);
+    // If cond
+    p->expr_->accept(this);
+    auto &lastInstr = (*currBlock->listInstr())[currBlock->listInstr()->size() - 1];
+    lastInstr.setUsedInJump(true);
+
+    auto jumpTarget = General::String(afterCondLabel);
     auto jump = General::Instr(INSTR_IF_NOT_JUMP, OP_NULL, General::Type(""),
                                argsType{env.getRecentRegister(), jumpTarget});
     currBlock->addInstr(jump);
 
+    // If body
+    env.addNewBlock(condLabel, newCondBlock);
     General::QuadrupleEnvironment localEnv(env);
     QuadrupleGenerator newQGen(p->stmt_, localEnv, newCondBlock);
 
-    // TODO dodać phi(env.varValues[loc], localEnv.varValues[loc]) dla każdego loc należącego do env (inne loc to local variables)
-    // oczywiście jeśli env.varValues[loc] != localEnv.varValues[loc]
+    env.addNewBlock(afterCondLabel, newAfterCondBlock);
     currBlock = newAfterCondBlock;
 
     Ident lastCondBlockLabel = newQGen.currBlock->getLabel();
-    env.generatePhiInstr(afterCondLabel, localEnv, lastCondBlockLabel, env, currLabel);
+    env.generatePhiInstr(afterCondLabel, localEnv, lastCondBlockLabel, env, currLabel, afterCondLabel);
 }
 
 void QuadrupleGenerator::visitCondElse(CondElse *p) {
-    p->expr_->accept(this);
-
     auto condLabel = env.getFreshLabel("if_body"), elseCondLabel = env.getFreshLabel(
             "else_body"), afterCondLabel = env.getFreshLabel("after_cond");
     auto newCondBlock = new General::QuadrupleBlock(General::NORMAL, condLabel);
     auto newElseCondBlock = new General::QuadrupleBlock(General::NORMAL, elseCondLabel);
     auto newAfterCondBlock = new General::QuadrupleBlock(General::NORMAL, afterCondLabel);
-    env.addNewBlock(condLabel, newCondBlock);
-    env.addNewBlock(elseCondLabel, newElseCondBlock);
-    env.addNewBlock(afterCondLabel, newAfterCondBlock);
 
-    auto condJumpTarget = General::Register(elseCondLabel);
+    // Cond
+    p->expr_->accept(this);
+    auto &lastInstr = (*currBlock->listInstr())[currBlock->listInstr()->size() - 1];
+    lastInstr.setUsedInJump(true);
+    auto condJumpTarget = General::String(elseCondLabel);
     auto condJump = General::Instr(INSTR_IF_NOT_JUMP, OP_NULL, General::Type(""),
                                    argsType{env.getRecentRegister(), condJumpTarget});
     currBlock->addInstr(condJump);
 
+    // If body
+    env.addNewBlock(condLabel, newCondBlock);
     General::QuadrupleEnvironment localEnv1(env);
-    General::QuadrupleEnvironment localEnv2(env);
     QuadrupleGenerator newQGen1(p->stmt_1, localEnv1, newCondBlock);
+
+    // Else body
+    env.addNewBlock(elseCondLabel, newElseCondBlock);
+    General::QuadrupleEnvironment localEnv2(env);
     QuadrupleGenerator newQGen2(p->stmt_2, localEnv2, newElseCondBlock);
 
-    auto condBodyJumpTarget = General::Register(afterCondLabel);
+    auto condBodyJumpTarget = General::String(afterCondLabel);
     auto condBodyJump = General::Instr(INSTR_JUMP, OP_NULL, General::Type(""), argsType{condBodyJumpTarget});
     newQGen1.currBlock->addInstr(condBodyJump);
 
-    // TODO dodać phi(condEnv.varValues[loc], elseEnv.varValues[loc]) dla każdego loc należącego do env (inne loc to local variables)
-
+    env.addNewBlock(afterCondLabel, newAfterCondBlock);
     currBlock = newAfterCondBlock;
 
     Ident lastCondBlockLabel = newQGen1.currBlock->getLabel();
     Ident lastElseBlockLabel = newQGen2.currBlock->getLabel();
-    env.generatePhiInstr(afterCondLabel, localEnv1, lastCondBlockLabel, localEnv2, lastElseBlockLabel);
+    env.generatePhiInstr(afterCondLabel, localEnv1, lastCondBlockLabel, localEnv2, lastElseBlockLabel, afterCondLabel);
 }
 
 void QuadrupleGenerator::visitWhile(While *p) {
-    // TODO optimization: delete blocks consisting of only jump
+    auto currLabel = currBlock->getLabel();
     auto condLabel = env.getFreshLabel("loop_cond"), whileBodyLabel = env.getFreshLabel(
             "loop_body"), afterWhileLabel = env.getFreshLabel("after_loop");
     auto newCondBlock = new General::QuadrupleBlock(General::LOOP, condLabel);
     //currBlock->addJump(General::Jump(newCondBlock));
     auto newWhileBlock = new General::QuadrupleBlock(General::NORMAL, whileBodyLabel);
     auto newAfterWhileBlock = new General::QuadrupleBlock(General::NORMAL, afterWhileLabel);
+
+    // Loop cond
     env.addNewBlock(condLabel, newCondBlock);
-    env.addNewBlock(whileBodyLabel, newWhileBlock);
-    env.addNewBlock(afterWhileLabel, newAfterWhileBlock);
-
     QuadrupleGenerator newCondQGen(p->expr_, env, newCondBlock);
-    auto condJumpTarget = General::Register(afterWhileLabel);
-
+    auto &lastInstr = (*newCondQGen.currBlock->listInstr())[newCondQGen.currBlock->listInstr()->size() - 1];
+    lastInstr.setUsedInJump(true);
+    auto condJumpTarget = General::String(afterWhileLabel);
     auto condJump = General::Instr(INSTR_IF_NOT_JUMP, OP_NULL, General::Type(""),
                                    argsType{env.getRecentRegister(), condJumpTarget});
     newCondQGen.currBlock->addInstr(condJump);
 
+    // Loop body
+    env.addNewBlock(whileBodyLabel, newWhileBlock);
     General::QuadrupleEnvironment localEnv(env);
     QuadrupleGenerator newBodyQGen(p->stmt_, localEnv, newWhileBlock);
-    auto bodyJumpTarget = General::Register(condLabel);
+    auto bodyJumpTarget = General::String(condLabel);
     auto bodyJump = General::Instr(INSTR_JUMP, OP_NULL, General::Type(""),
                                    argsType{bodyJumpTarget});
     newBodyQGen.currBlock->addInstr(bodyJump);
 
-    // TODO dodać phi(env.varValues[loc], localEnv.varValues[loc]) dla każdego loc należącego do env (inne loc to local variables)
-
+    env.addNewBlock(afterWhileLabel, newAfterWhileBlock);
     currBlock = newAfterWhileBlock;
 
     Ident lastBodyBlockLabel = newBodyQGen.currBlock->getLabel();
-    env.generatePhiInstr(afterWhileLabel, localEnv, lastBodyBlockLabel, env, condLabel);
+    env.generatePhiInstr(condLabel, localEnv, lastBodyBlockLabel, env, currLabel, whileBodyLabel);
+    env.generatePhiInstr(afterWhileLabel, localEnv, lastBodyBlockLabel, env, condLabel, afterWhileLabel);
 }
 
 // TODO usunąć trywialne phi (takie, które odnoszą się do swojego bloku i zmienna nie zmienia się)
@@ -375,16 +381,20 @@ void QuadrupleGenerator::visitEmpty(Empty *p) {}
 void QuadrupleGenerator::visitFun(Fun *p) {}
 
 void QuadrupleGenerator::visitNeg(Neg *p) {
-    auto res = General::Register(env.getFreshTemp());
     p->expr_->accept(this);
-    auto instr = General::Instr(INSTR_ASSIGNMENT, OP_NEG, res, argsType{res, env.getRecentRegister()});
+    auto arg = env.getRecentRegister();
+
+    auto res = General::Register(env.getFreshTemp());
+    auto instr = General::Instr(INSTR_ASSIGNMENT, OP_NEG, res, argsType{arg});
     currBlock->addInstr(instr);
 }
 
 void QuadrupleGenerator::visitNot(Not *p) {
-    auto res = General::Register(env.getFreshTemp());
     p->expr_->accept(this);
-    auto instr = General::Instr(INSTR_ASSIGNMENT, OP_NOT, res, argsType{res, env.getRecentRegister()});
+    auto arg = env.getRecentRegister();
+
+    auto res = General::Register(env.getFreshTemp());
+    auto instr = General::Instr(INSTR_ASSIGNMENT, OP_NOT, res, argsType{arg});
     currBlock->addInstr(instr);
 }
 

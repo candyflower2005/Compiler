@@ -38,4 +38,7 @@ add_executable(Latte
         src/general/quadruple_environment.cpp
         src/general/quadruple_environment.h
         src/backend/Optimizer.cpp
-        src/backend/Optimizer.h)
+        src/backend/Optimizer.h
+        src/backend/AssemblyCodeGenerator.cpp
+        src/backend/AssemblyCodeGenerator.h
+        lib/runtime.c)

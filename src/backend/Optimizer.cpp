@@ -9,7 +9,8 @@ void Optimizer::eliminatePhi() {
                 phiCnt++;
                 std::vector<General::Type> &phiArgs = *(instr.getArgs());
                 auto res = *(instr.getRes());
-                Ident label1 = phiArgs[0].getVal(), temp1 = phiArgs[1].getVal(), label2 = phiArgs[2].getVal(), temp2 = phiArgs[3].getVal();
+                Ident label1 = phiArgs[0].getVal(), label2 = phiArgs[2].getVal();
+                auto temp1 = phiArgs[1], temp2 = phiArgs[3];
                 auto instr1 = General::Instr(INSTR_ASSIGNMENT, OP_ASSIGNMENT, res, argsType{temp1});
                 auto instr2 = General::Instr(INSTR_ASSIGNMENT, OP_ASSIGNMENT, res, argsType{temp2});
                 (*blocksMap)[label1]->addInstrBeforeJump(instr1);
@@ -92,7 +93,59 @@ void Optimizer::createGraph() {
 }
 
 void Optimizer::concatBlocks() {
-    // TODO
+    bool changed = true;
+    while (changed) {
+        changed = false;
+        for (auto &b: *blocksMap) {
+            if (b.second->listInstr()->empty()) {
+                Ident label = b.first;
+
+                blocksMap->erase(label);
+                auto blockIt = blocks->begin();
+                while ((*blockIt)->getLabel() != label) {
+                    blockIt++;
+                }
+                Ident nextBlockLabel = (*(blockIt + 1))->getLabel();
+                blocks->erase(blockIt);
+
+                for (auto &bl: *blocks) {
+                    for (auto &instr: *bl->listInstr()) {
+                        if (instr.getInstrName() == INSTR_IF_NOT_JUMP) {
+                            auto &targetArg = (*instr.getArgs())[1];
+                            if (targetArg.getVal() == label) {
+                                targetArg.changeVal(nextBlockLabel);
+                            }
+                        }
+                    }
+                }
+
+                auto &blockIn = edges_in[label];
+                for (int i = 0; i < blockIn.size(); i++) {
+                    std::string inBlockLabel = blockIn[i];
+                    auto blockIt = edges_out[inBlockLabel].begin();
+                    while (*blockIt != label) {
+                        blockIt++;
+                    }
+                    edges_out[inBlockLabel].erase(blockIt);
+                    edges_out[inBlockLabel].push_back(nextBlockLabel);
+                }
+
+                auto &blockOut = edges_out[label];
+                for (int i = 0; i < blockOut.size(); i++) {
+                    std::string outBlockLabel = blockOut[i];
+                    auto blockIt = edges_in[outBlockLabel].begin();
+                    while (*blockIt != label) {
+                        blockIt++;
+                    }
+                    edges_in[outBlockLabel].erase(blockIt);
+                    edges_in[outBlockLabel].push_back(nextBlockLabel);
+                }
+
+                changed = true;
+                break;
+            }
+        }
+    }
 }
 
 void Optimizer::computeDataFlow() {
@@ -120,19 +173,23 @@ void Optimizer::computeDataFlow() {
         // Compute ins
         for (auto &b: *blocksMap) {
             Ident blockName = b.first;
+            //std::cerr << "Block " << blockName  << std::endl;
             int numInstr = b.second->listInstr()->size();
             for (int i = numInstr - 1; i >= 0; --i) {
+                //std::cerr << "\tInstr " << i << std::endl;
                 General::Instr &currInstr = (*b.second->listInstr())[i];
                 std::unordered_set<Ident> kill_i{};
                 std::unordered_set<Ident> use_i{};
 
                 if (currInstr.getRes()->print() == "register") {
                     kill_i.insert(currInstr.getRes()->getVal());
+                    //std::cerr << "\t\tkill_i: wrzucam " << currInstr.getRes()->getVal() << std::endl;
                 }
 
                 for (auto &arg: *currInstr.getArgs()) {
                     if (arg.print() == "register") {
                         use_i.insert(arg.getVal());
+                        //std::cerr << "\t\tuse_i: wrzuczam " << arg.getVal() << std::endl;
                     }
                 }
 
@@ -147,7 +204,7 @@ void Optimizer::computeDataFlow() {
 
                 ins[blockName][i] = in_i;
                 if (i > 0) {
-                    outs[blockName][i-1] = in_i;
+                    outs[blockName][i - 1] = in_i;
                 }
             }
         }
@@ -167,6 +224,17 @@ void Optimizer::computeDataFlow() {
         int cnt = 0;
         for (auto &b: *blocksMap) {
             Ident blockName = b.first;
+            std::cerr << "Block " << blockName << ":" << std::endl;
+            std::cerr << "\tin[0]:";
+            for (auto &el: ins[blockName][0]) {
+                std::cerr << " " << el;
+            }
+            std::cerr << std::endl;
+            std::cerr << "\tout[-1]:";
+            for (auto &el: outs[blockName][outs[blockName].size() - 1]) {
+                std::cerr << " " << el;
+            }
+            std::cerr << std::endl;
             if (ins[blockName][0] != curr_ins[cnt] || outs[blockName][outs[blockName].size() - 1] != curr_outs[cnt]) {
                 diff = true;
             }
@@ -185,7 +253,14 @@ Optimizer::Optimizer(General::QuadrupleEnvironment &env) : blocks(env.getBlocks(
         edges_in[b.first] = std::vector<Ident>();
         edges_out[b.first] = std::vector<Ident>();
     }
+}
 
+std::vector<General::QuadrupleBlock *> *Optimizer::getBlocks() {
+    return blocks;
+}
+
+std::unordered_map<Ident, General::QuadrupleBlock *> *Optimizer::getBlocksMap() {
+    return blocksMap;
 }
 
 void Optimizer::print() {
@@ -202,10 +277,14 @@ void Optimizer::optimize() {
     createGraph();
     std::cerr << "\neliminating phis" << std::endl;
     eliminatePhi();
+
+    std::cerr << "\ncurrent code:" << std::endl;
+    print();
+
     std::cerr << "\nconcating blocks" << std::endl;
     concatBlocks();
 
-    std::cerr << "\ncurrent code:" << std::endl;
+    std::cerr << "\nafter concat:" << std::endl;
     print();
 
     computeDataFlow();

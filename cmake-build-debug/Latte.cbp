@@ -92,6 +92,15 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/lib/runtime.c">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/backend/AssemblyCodeGenerator.cpp">
+			<Option target="Latte"/>
+		</Unit>
+		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/backend/AssemblyCodeGenerator.h">
+			<Option target="Latte"/>
+		</Unit>
 		<Unit filename="/home/cukiereczek/Workspace/MRJP/Latte/src/backend/Optimizer.cpp">
 			<Option target="Latte"/>
 		</Unit>

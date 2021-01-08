@@ -12,6 +12,9 @@ GRAMMAR=src/grammar/
 
 all: latc
 
+# gcc -m32 -fno-stack-protector -c lib/runtime.c -nostdlib -o lib/runtime.o
+# gcc -m32 -c lib/runtime.c -o lib/runtime.o
+
 clean:
 	rm latc
 	rm -r ${GRAMMAR}*.o
@@ -34,8 +37,8 @@ ${GRAMMAR}Lexer.o: ${GRAMMAR}Lexer.C ${GRAMMAR}Parser.H
 ${GRAMMAR}Parser.o: ${GRAMMAR}Parser.C ${GRAMMAR}Absyn.H
 	${CC} ${CCFLAGS} -c ${GRAMMAR}Parser.C -o ${GRAMMAR}Parser.o
 
-latc: ${GENERAL}latc.o ${FRONTEND}Frontend.o ${GRAMMAR}Parser.o ${BACKEND}QuadrupleGenerator.o ${GENERAL}environment.o ${GENERAL}logger.o ${GENERAL}function_def.o ${FRONTEND}ExprFrontend.o ${GENERAL}types.o ${FRONTEND}TopDefFrontend.o ${FRONTEND}DeclFrontend.o ${GRAMMAR}Absyn.o ${GRAMMAR}Lexer.o ${GENERAL}quadruple_environment.o ${BACKEND}Optimizer.o
-	${CC} ${CCFLAGS} ${GENERAL}latc.o ${FRONTEND}Frontend.o ${GENERAL}environment.o ${GENERAL}logger.o ${GRAMMAR}Parser.o ${BACKEND}QuadrupleGenerator.o ${GENERAL}function_def.o ${FRONTEND}ExprFrontend.o ${GENERAL}types.o ${FRONTEND}TopDefFrontend.o ${FRONTEND}DeclFrontend.o ${GRAMMAR}Absyn.o ${GRAMMAR}Lexer.o ${GENERAL}quadruple_environment.o ${BACKEND}Optimizer.o -o latc
+latc: ${GENERAL}latc.o ${FRONTEND}Frontend.o ${GRAMMAR}Parser.o ${BACKEND}QuadrupleGenerator.o ${GENERAL}environment.o ${GENERAL}logger.o ${GENERAL}function_def.o ${FRONTEND}ExprFrontend.o ${GENERAL}types.o ${FRONTEND}TopDefFrontend.o ${FRONTEND}DeclFrontend.o ${GRAMMAR}Absyn.o ${GRAMMAR}Lexer.o ${GENERAL}quadruple_environment.o ${BACKEND}Optimizer.o ${BACKEND}AssemblyCodeGenerator.o
+	${CC} ${CCFLAGS} ${GENERAL}latc.o ${FRONTEND}Frontend.o ${GENERAL}environment.o ${GENERAL}logger.o ${GRAMMAR}Parser.o ${BACKEND}QuadrupleGenerator.o ${GENERAL}function_def.o ${FRONTEND}ExprFrontend.o ${GENERAL}types.o ${FRONTEND}TopDefFrontend.o ${FRONTEND}DeclFrontend.o ${GRAMMAR}Absyn.o ${GRAMMAR}Lexer.o ${GENERAL}quadruple_environment.o ${BACKEND}Optimizer.o ${BACKEND}AssemblyCodeGenerator.o -o latc
 
 ${GENERAL}latc.o: ${GENERAL}latc.cpp ${FRONTEND}Frontend.h ${GRAMMAR}Parser.H ${GENERAL}environment.h ${GENERAL}logger.h
 	${CC} ${CCFLAGS} -c ${GENERAL}latc.cpp -o ${GENERAL}latc.o
@@ -67,5 +70,5 @@ ${GENERAL}quadruple_environment.o: ${GENERAL}quadruple_environment.cpp ${GENERAL
 ${BACKEND}Optimizer.o: ${BACKEND}Optimizer.cpp ${BACKEND}Optimizer.h ${GENERAL}types.h ${GENERAL}quadruple_environment.h
 	${CC} ${CCFLAGS} -c ${BACKEND}Optimizer.cpp -o ${BACKEND}Optimizer.o
 
-
-
+${BACKEND}AssemblyCodeGenerator.o: ${BACKEND}AssemblyCodeGenerator.cpp ${BACKEND}AssemblyCodeGenerator.h ${BACKEND}Optimizer.h
+	${CC} ${CCFLAGS} -c ${BACKEND}AssemblyCodeGenerator.cpp -o ${BACKEND}AssemblyCodeGenerator.o

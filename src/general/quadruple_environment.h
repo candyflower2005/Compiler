@@ -28,6 +28,8 @@ namespace General {
         std::shared_ptr<varAddressesType> varAddesses;
         std::shared_ptr<varValuesType> varValues;
 
+        bool replaceOccurrence(Ident blockName, Ident oldTemp, Ident newTemp);
+
     public:
         static int locCnt, blockCnt, tempCnt;
 
@@ -66,7 +68,7 @@ namespace General {
         Ident getVarValue(Loc loc);
 
         void generatePhiInstr(Ident currBlock, QuadrupleEnvironment &env1, Ident label1, QuadrupleEnvironment &env2,
-                              Ident label2);
+                              Ident label2, Ident endpoint);
 
         Ident getFunBlockLabel(Ident funName);
 
