@@ -4,6 +4,11 @@ int main() {
 	check_runtime();
 	return 0;
 }
+
+int f() {
+	error();
+}
+
 int check_constexpr() {
 	if (4 + 42 != 46) {error();}
 

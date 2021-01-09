@@ -44,6 +44,10 @@ void ExprFrontend::visitELitFalse(ELitFalse *p) {
 void ExprFrontend::visitEApp(EApp *p) {
     int lineNumber = p->line_number;
     Ident funName = p->ident_;
+    if (funName == "error") {
+        ret = MUST_RETURN;
+        env.funsWithError->insert(currTopDef);
+    }
 
     if (funName == "main") {
         logger.logError(lineNumber, "can't call function 'main'");

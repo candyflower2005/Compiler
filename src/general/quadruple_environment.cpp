@@ -141,9 +141,8 @@ void General::QuadrupleEnvironment::generatePhiInstr(Ident currBlock, General::Q
 }
 
 void General::QuadrupleEnvironment::print() {
-    std::cerr << "wchodze, liczba bloków wynosi " << blocks->size() << std::endl;
     for (auto &b: *blocks) {
         b->print();
-        std::cerr << std::endl;
+        std::cout << std::endl;
     }
 }

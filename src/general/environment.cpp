@@ -4,7 +4,7 @@
 #include "types.h"
 
 
-General::Environment::Environment() {
+General::Environment::Environment() : funsWithError(new std::unordered_set<Ident>()) {
     used.push_back("printInt");
     used.push_back("printString");
     used.push_back("error");
@@ -30,7 +30,8 @@ General::Environment::Environment() {
 }
 
 General::Environment::Environment(Environment &env, bool deeper) : used(env.used), funDefs(env.funDefs),
-                                                                   varVals(env.varVals), depths(env.depths) {
+                                                                   varVals(env.varVals), depths(env.depths),
+                                                                   funsWithError(env.funsWithError) {
     myDepth = env.myDepth;
     if (deeper) {
         myDepth++;

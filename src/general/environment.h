@@ -6,6 +6,7 @@
 #include<map>
 #include<vector>
 #include<string>
+#include <unordered_set>
 
 typedef std::map<Ident, General::Type> varValsType;
 typedef std::map<Ident, int> depthsType;
@@ -17,7 +18,6 @@ namespace General {
         varValsType varVals;
         depthsType depths;
         int myDepth;
-
     public:
         Environment();
 
@@ -38,6 +38,8 @@ namespace General {
         FunctionDef *getFunctionDef(Ident funName);
 
         std::map<Ident, FunctionDef *> getFunDefs();
+
+        std::unordered_set<Ident> *funsWithError;
     };
 }
 

@@ -129,61 +129,61 @@ void QuadrupleBlock::addInstr(Instr singleInstr, bool start) {
 void Instr::print() {
     if (instrName == INSTR_ASSIGNMENT) {
         if (opName == OP_ASSIGNMENT) {
-            std::cerr << "\t" << result.getVal() + " = " + args[0].getVal() << std::endl;
+            std::cout << "\t" << result.getVal() + " = " + args[0].getVal() << std::endl;
         } else if (opName == OP_NOT || opName == OP_NEG) {
-            std::cerr << "\t" << result.getVal() + " = " + opName + args[0].getVal() << std::endl;
+            std::cout << "\t" << result.getVal() + " = " + opName + args[0].getVal() << std::endl;
         } else if (opName == OP_PARAM) {
-            std::cerr << "\t" << result.getVal() + " = param " << args[0].getVal() << std::endl;
+            std::cout << "\t" << result.getVal() + " = param " << args[0].getVal() << std::endl;
         } else {
-            std::cerr << "\t" << result.getVal() + " = " + args[0].getVal() + " " + opName + " " + args[1].getVal()
+            std::cout << "\t" << result.getVal() + " = " + args[0].getVal() + " " + opName + " " + args[1].getVal()
                       << std::endl;
         }
     } else if (instrName == INSTR_PHI) {
-        std::cerr << "\t" << result.getVal() + " = phi(";
+        std::cout << "\t" << result.getVal() + " = phi(";
         for (auto it = args.begin(); it != args.end(); it += 2) {
             if (it != args.begin()) {
-                std::cerr << ", ";
+                std::cout << ", ";
             }
-            std::cerr << it->getVal() << ":" << (it + 1)->getVal();
+            std::cout << it->getVal() << ":" << (it + 1)->getVal();
         }
-        std::cerr << ")" << std::endl;
+        std::cout << ")" << std::endl;
     } else if (instrName == INSTR_CALL_RET) {
-        std::cerr << "\t" << result.getVal() << " = call " + args[0].getVal() + "(";
+        std::cout << "\t" << result.getVal() << " = call " + args[0].getVal() + "(";
         for (size_t i = 1; i < args.size(); i++) {
             if (i > 1) {
-                std::cerr << ", ";
+                std::cout << ", ";
             }
-            std::cerr << args[i].getVal();
+            std::cout << args[i].getVal();
         }
-        std::cerr << ")" << std::endl;
+        std::cout << ")" << std::endl;
     } else if (instrName == INSTR_CALL_NO_RET) {
-        std::cerr << "\tcall " + args[0].getVal() + "(";
+        std::cout << "\tcall " + args[0].getVal() + "(";
         for (size_t i = 1; i < args.size(); i++) {
             if (i > 1) {
-                std::cerr << ", ";
+                std::cout << ", ";
             }
-            std::cerr << args[i].getVal();
+            std::cout << args[i].getVal();
         }
-        std::cerr << ")" << std::endl;
+        std::cout << ")" << std::endl;
     } else if (instrName == INSTR_RETURN) {
-        std::cerr << "\treturn";
+        std::cout << "\treturn";
         if (!args.empty()) {
-            std::cerr << " " + args[0].getVal();
+            std::cout << " " + args[0].getVal();
         }
-        std::cerr << std::endl;
+        std::cout << std::endl;
     } else if (instrName == INSTR_JUMP) {
-        std::cerr << "\tjump " + args[0].getVal() << std::endl;
+        std::cout << "\tjump " + args[0].getVal() << std::endl;
     } else if (instrName == INSTR_IF_NOT_JUMP) {
-        std::cerr << "\tif !" + args[0].getVal() + " then jump " + args[1].getVal() << std::endl;
+        std::cout << "\tif !" + args[0].getVal() + " then jump " + args[1].getVal() << std::endl;
     } else if (instrName == INSTR_IF_JUMP) {
-        std::cerr << "\tif " + args[0].getVal() + " then jump " + args[1].getVal() << std::endl;
+        std::cout << "\tif " + args[0].getVal() + " then jump " + args[1].getVal() << std::endl;
     } else {
-        std::cerr << "error" << std::endl;
+        std::cout << "error" << std::endl;
     }
 }
 
 void QuadrupleBlock::print() {
-    std::cerr << label + ":" << std::endl;
+    std::cout << label + ":" << std::endl;
     for (size_t i = 0; i < instr.size(); i++) {
         instr[i].print();
     }

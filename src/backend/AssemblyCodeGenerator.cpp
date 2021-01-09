@@ -354,9 +354,7 @@ AssemblyCodeGenerator::generateFunCode(std::vector<General::QuadrupleBlock *>::i
         if (b->getLabel().rfind("fun", 0) != 0) {
             rest.emplace_back(b->getLabel() + ":");
         }
-        std::cerr << std::endl;
         for (instrIt = b->listInstr()->begin(); instrIt != b->listInstr()->end(); ++instrIt) {
-            std::cerr << instrIt->getInstrName() << std::endl;
             if (instrIt->getInstrName() == INSTR_RETURN) {
                 handleRet(*instrIt, rest, firstFree);
             }
@@ -426,10 +424,7 @@ std::string AssemblyCodeGenerator::generateCode() {
     for (auto &tempString: tempToString) {
         auto temp = std::string(tempString.first.begin() + 1, tempString.first.end());
         auto string = tempString.second;
-        if (exists.find(string) == exists.end()) {
-            data += temp + ": .string \"" + string + "\"\n";
-            exists.insert(string);
-        }
+        data += temp + ": .string \"" + string + "\"\n";
     }
 
     if (!tempToString.empty()) {

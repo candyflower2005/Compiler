@@ -3,6 +3,7 @@
 #include "DeclFrontend.h"
 #include "ExprFrontend.h"
 
+
 void Frontend::visitProgram(Program *p) {}
 
 void Frontend::visitProg(Prog *p) {
@@ -45,7 +46,8 @@ void Frontend::visitFnDef(FnDef *p) {
     Frontend parseFunBlock(p->block_, localEnv, logger, funName);
 
     auto funType = funDef->getFunType().print();
-    if (parseFunBlock.ret == CANT_RETURN && funType != "void") {
+    if (parseFunBlock.ret == CANT_RETURN && funType != "void" &&
+        env.funsWithError->find(currTopDef) != env.funsWithError->end()) {
         logger.logError(lineNumber, "function '" + funName + "' must return " + funType);
     }
 }

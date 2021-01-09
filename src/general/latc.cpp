@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 #include "../frontend/Frontend.h"
 #include "../grammar/Parser.H"
@@ -56,7 +57,7 @@ int main(int argc, char **argv) {
 
     General::QuadrupleEnvironment newEnv(env);
     QuadrupleGenerator qGen(ast, newEnv);
-    std::cerr << "env przed optymalizacjami:" << std::endl;
+    std::cout << "Kod (przed optymalizacjami):" << std::endl;
     newEnv.print();
 
     Optimizer opt(newEnv);
@@ -80,7 +81,12 @@ int main(int argc, char **argv) {
     std::string out_file_name = directory + "/" + filename + ".o";
     std::string ex_file_name = directory + "/" + filename;
 
-    std::string instr = "gcc -m32 lib/runtime.o " + ass_file_name + " -o " + ex_file_name;
+    std::string comp = "i686-linux-gnu-gcc";
+    if (strcmp(argv[2], "gcc") == 0) {
+        comp = "gcc";
+    }
+
+    std::string instr = comp + " -m32 lib/runtime.o " + ass_file_name + " -o " + ex_file_name;
     std::system(instr.c_str());
 
     return 0;

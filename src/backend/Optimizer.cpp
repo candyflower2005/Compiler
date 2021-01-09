@@ -45,7 +45,6 @@ void Optimizer::createGraph() {
                 }
             } else {
                 auto nextBlockLabel = (*nextBlock)->getLabel();
-                std::cerr << "(" << blockLabel << ", " << nextBlockLabel << ")" << std::endl;
                 edges_out[blockLabel].push_back(nextBlockLabel);
                 edges_in[nextBlockLabel].push_back(blockLabel);
             }
@@ -58,19 +57,16 @@ void Optimizer::createGraph() {
             continue;
         } else if (instrName == INSTR_JUMP) {
             auto jumpTarget = (*lastInstr->getArgs())[0].getVal();
-            std::cerr << "(" << blockLabel << ", " << jumpTarget << ")" << std::endl;
             edges_out[blockLabel].push_back(jumpTarget);
             edges_in[jumpTarget].push_back(blockLabel);
         } else if (instrName == INSTR_IF_NOT_JUMP || instrName == INSTR_IF_JUMP) {
             auto jumpTarget = (*lastInstr->getArgs())[1].getVal();
             edges_out[blockLabel].push_back(jumpTarget);
             edges_in[jumpTarget].push_back(blockLabel);
-            std::cerr << "(" << blockLabel << ", " << jumpTarget << ")" << std::endl;
 
             auto nextBlockLabel = (*nextBlock)->getLabel();
             edges_out[blockLabel].push_back(nextBlockLabel);
             edges_in[nextBlockLabel].push_back(blockLabel);
-            std::cerr << "(" << blockLabel << ", " << nextBlockLabel << ")" << std::endl;
         } else {
             if (nextBlock == blocks->end() || (*nextBlock)->getLabel().rfind("fun", 0) == 0) {
                 if (funDefs[currFun]->getFunType().print() == "void") {
@@ -86,7 +82,6 @@ void Optimizer::createGraph() {
                 auto nextBlockLabel = (*nextBlock)->getLabel();
                 edges_out[blockLabel].push_back(nextBlockLabel);
                 edges_in[nextBlockLabel].push_back(blockLabel);
-                std::cerr << "(" << blockLabel << ", " << nextBlockLabel << ")" << std::endl;
             }
         }
     }
@@ -167,7 +162,6 @@ void Optimizer::computeDataFlow() {
     }
 
     while (true) {
-        std::cerr << "iteration!" << std::endl;
         // Store state from the last iteration
         auto curr_ins = std::vector<std::unordered_set<Ident>>();
         auto curr_outs = std::vector<std::unordered_set<Ident>>();
@@ -230,17 +224,6 @@ void Optimizer::computeDataFlow() {
         int cnt = 0;
         for (auto &b: *blocksMap) {
             Ident blockName = b.first;
-//            std::cerr << blockName << std::endl;
-//            std::cerr << "Block " << blockName << ":" << std::endl;
-//            std::cerr << "\tin[0]:";
-//            for (auto &el: ins[blockName][0]) {
-//                std::cerr << " " << el;
-//            }
-//            std::cerr << std::endl;
-//
-//            for (auto &el: outs[blockName][outs[blockName].size() - 1]) {
-//                std::cerr << " " << el;
-//            }
             if (ins[blockName][0] != curr_ins[cnt] || outs[blockName][outs[blockName].size() - 1] != curr_outs[cnt]) {
                 diff = true;
             }
@@ -250,7 +233,6 @@ void Optimizer::computeDataFlow() {
             break;
         }
     }
-    // out[B_i] = sum_(B_j=succ)(in[B_j])
 }
 
 Optimizer::Optimizer(General::QuadrupleEnvironment &env) : blocks(env.getBlocks()), blocksMap(env.getBlocksMap()),
@@ -272,26 +254,26 @@ std::unordered_map<Ident, General::QuadrupleBlock *> *Optimizer::getBlocksMap() 
 void Optimizer::print() {
     for (auto &b: *blocks) {
         b->print();
-        std::cerr << std::endl;
+        std::cout << std::endl;
     }
 }
 
 void Optimizer::optimize() {
-    std::cerr << "\n\n\n\n\nOptimizer:\n" << std::endl;
+    //std::cerr << "\n\n\n\n\nOptimizer:\n" << std::endl;
 
-    std::cerr << "\ncreating graph" << std::endl;
+    //std::cerr << "\ncreating graph" << std::endl;
     createGraph();
-    std::cerr << "\neliminating phis" << std::endl;
+    //std::cerr << "\neliminating phis" << std::endl;
     eliminatePhi();
 
-    std::cerr << "\ncurrent code:" << std::endl;
-    print();
+    //std::cerr << "\ncurrent code:" << std::endl;
+    //print();
 
-    std::cerr << "\nconcating blocks" << std::endl;
+    //std::cerr << "\nconcating blocks" << std::endl;
     concatBlocks();
 
-    std::cerr << "\nafter concat:" << std::endl;
-    print();
+    //std::cerr << "\nafter concat:" << std::endl;
+    //print();
 
     computeDataFlow();
 }
