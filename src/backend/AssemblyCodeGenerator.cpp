@@ -420,7 +420,7 @@ std::string AssemblyCodeGenerator::generateCode() {
     }
 
     std::string data = ".data\n";
-    std::unordered_set<std::string> exists;
+
     for (auto &tempString: tempToString) {
         auto temp = std::string(tempString.first.begin() + 1, tempString.first.end());
         auto string = tempString.second;

@@ -267,13 +267,11 @@ void Optimizer::optimize() {
     eliminatePhi();
 
     //std::cerr << "\ncurrent code:" << std::endl;
-    //print();
 
     //std::cerr << "\nconcating blocks" << std::endl;
     concatBlocks();
 
     //std::cerr << "\nafter concat:" << std::endl;
-    //print();
 
     computeDataFlow();
 }

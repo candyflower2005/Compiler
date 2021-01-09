@@ -57,8 +57,8 @@ int main(int argc, char **argv) {
 
     General::QuadrupleEnvironment newEnv(env);
     QuadrupleGenerator qGen(ast, newEnv);
-    std::cout << "Kod (przed optymalizacjami):" << std::endl;
-    newEnv.print();
+    //std::cout << "Kod (przed optymalizacjami):" << std::endl;
+    //newEnv.print();
 
     Optimizer opt(newEnv);
     opt.optimize();
@@ -76,13 +76,13 @@ int main(int argc, char **argv) {
     std::ofstream ass_file(ass_file_name);
     ass_file << out_code << std::endl;
 
-    std::cout << "\n\n\n" << out_code << std::endl;
+    //std::cout << "\n\n\n" << out_code << std::endl;
 
     std::string out_file_name = directory + "/" + filename + ".o";
     std::string ex_file_name = directory + "/" + filename;
 
     std::string comp = "i686-linux-gnu-gcc";
-    if (strcmp(argv[2], "gcc") == 0) {
+    if (argc > 2 && strcmp(argv[2], "gcc") == 0) {
         comp = "gcc";
     }
 

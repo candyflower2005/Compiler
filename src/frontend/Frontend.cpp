@@ -47,7 +47,7 @@ void Frontend::visitFnDef(FnDef *p) {
 
     auto funType = funDef->getFunType().print();
     if (parseFunBlock.ret == CANT_RETURN && funType != "void" &&
-        env.funsWithError->find(currTopDef) != env.funsWithError->end()) {
+        env.funsWithError->find(currTopDef) == env.funsWithError->end()) {
         logger.logError(lineNumber, "function '" + funName + "' must return " + funType);
     }
 }
