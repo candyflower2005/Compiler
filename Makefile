@@ -10,12 +10,12 @@ BACKEND=src/backend/
 FRONTEND=src/frontend/
 GRAMMAR=src/grammar/
 
-all: latc
+all: latc_x86
 
 # gcc -m32 -c lib/runtime.c -o lib/runtime.o
 
 clean:
-	rm latc
+	rm latc_x86
 	rm -r ${GRAMMAR}*.o
 	rm -r ${BACKEND}*.o
 	rm -r ${FRONTEND}*.o
@@ -36,8 +36,8 @@ ${GRAMMAR}Lexer.o: ${GRAMMAR}Lexer.C ${GRAMMAR}Parser.H
 ${GRAMMAR}Parser.o: ${GRAMMAR}Parser.C ${GRAMMAR}Absyn.H
 	${CC} ${CCFLAGS} -c ${GRAMMAR}Parser.C -o ${GRAMMAR}Parser.o
 
-latc: ${GENERAL}latc.o ${FRONTEND}Frontend.o ${GRAMMAR}Parser.o ${BACKEND}QuadrupleGenerator.o ${GENERAL}environment.o ${GENERAL}logger.o ${GENERAL}function_def.o ${FRONTEND}ExprFrontend.o ${GENERAL}types.o ${FRONTEND}TopDefFrontend.o ${FRONTEND}DeclFrontend.o ${GRAMMAR}Absyn.o ${GRAMMAR}Lexer.o ${GENERAL}quadruple_environment.o ${BACKEND}Optimizer.o ${BACKEND}AssemblyCodeGenerator.o
-	${CC} ${CCFLAGS} ${GENERAL}latc.o ${FRONTEND}Frontend.o ${GENERAL}environment.o ${GENERAL}logger.o ${GRAMMAR}Parser.o ${BACKEND}QuadrupleGenerator.o ${GENERAL}function_def.o ${FRONTEND}ExprFrontend.o ${GENERAL}types.o ${FRONTEND}TopDefFrontend.o ${FRONTEND}DeclFrontend.o ${GRAMMAR}Absyn.o ${GRAMMAR}Lexer.o ${GENERAL}quadruple_environment.o ${BACKEND}Optimizer.o ${BACKEND}AssemblyCodeGenerator.o -o latc
+latc_x86: ${GENERAL}latc.o ${FRONTEND}Frontend.o ${GRAMMAR}Parser.o ${BACKEND}QuadrupleGenerator.o ${GENERAL}environment.o ${GENERAL}logger.o ${GENERAL}function_def.o ${FRONTEND}ExprFrontend.o ${GENERAL}types.o ${FRONTEND}TopDefFrontend.o ${FRONTEND}DeclFrontend.o ${GRAMMAR}Absyn.o ${GRAMMAR}Lexer.o ${GENERAL}quadruple_environment.o ${BACKEND}Optimizer.o ${BACKEND}AssemblyCodeGenerator.o
+	${CC} ${CCFLAGS} ${GENERAL}latc.o ${FRONTEND}Frontend.o ${GENERAL}environment.o ${GENERAL}logger.o ${GRAMMAR}Parser.o ${BACKEND}QuadrupleGenerator.o ${GENERAL}function_def.o ${FRONTEND}ExprFrontend.o ${GENERAL}types.o ${FRONTEND}TopDefFrontend.o ${FRONTEND}DeclFrontend.o ${GRAMMAR}Absyn.o ${GRAMMAR}Lexer.o ${GENERAL}quadruple_environment.o ${BACKEND}Optimizer.o ${BACKEND}AssemblyCodeGenerator.o -o latc_x86
 
 ${GENERAL}latc.o: ${GENERAL}latc.cpp ${FRONTEND}Frontend.h ${GRAMMAR}Parser.H ${GENERAL}environment.h ${GENERAL}logger.h
 	${CC} ${CCFLAGS} -c ${GENERAL}latc.cpp -o ${GENERAL}latc.o
