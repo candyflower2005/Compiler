@@ -133,6 +133,9 @@ void ExprFrontend::visitEMul(EMul *p) {
         if (mulExprType.print() == "times") {
             retType = General::Int(val1 * val2);
         } else if (mulExprType.print() == "div") {
+            if (val2 == 0) {
+                logger.logError(lineNumber, "can't divide by 0");
+            }
             retType = General::Int(val1 / val2);
         } else if (mulExprType.print() == "mod") {
             retType = General::Int(val1 % val2);

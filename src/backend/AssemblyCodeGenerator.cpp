@@ -1,8 +1,5 @@
 #include "AssemblyCodeGenerator.h"
 
-std::string generateData() {
-    std::string out = ".data\n";
-}
 
 void AssemblyCodeGenerator::handleRet(General::Instr &currInstr, std::vector<std::string> &assInstr, int &firstFree) {
     if (!currInstr.getArgs()->empty()) {
@@ -283,8 +280,6 @@ void AssemblyCodeGenerator::handleAss(General::Instr &currInstr, std::vector<std
         assInstr.emplace_back("mov %ecx, %eax");
     }
     if (currInstr.getOpName() == OP_PLUS) {
-        std::cerr << "sumuje " << arg0.getVal() << " z " << arg1.getVal() << std::endl;
-        std::cerr << "oto size " << stringRegs.size() << std::endl;
         if (stringRegs.find(arg0.getVal()) != stringRegs.end()) {
             assInstr.emplace_back("push %ebx");
             assInstr.emplace_back("push %eax");
@@ -307,6 +302,15 @@ void AssemblyCodeGenerator::handleAss(General::Instr &currInstr, std::vector<std
         assInstr.emplace_back("imul %ebx, %eax");
     }
     if (currInstr.getOpName() == OP_DIV) {
+        auto newStr = "$zeroDivMsg";
+        tempToString[newStr] = "can't divide by 0";
+
+        assInstr.emplace_back("cmp $0, %ebx");
+        assInstr.emplace_back("jne after_div_" + std::to_string(afterDiv));
+        assInstr.emplace_back("push $zeroDivMsg");
+        assInstr.emplace_back("call fun_runTimeError");
+        assInstr.emplace_back("after_div_" + std::to_string(afterDiv) + ":");
+        afterDiv++;
         assInstr.emplace_back("cdq");
         assInstr.emplace_back("idiv %ebx");
     }
@@ -418,10 +422,14 @@ std::string AssemblyCodeGenerator::generateCode() {
     }
 
     std::string data = ".data\n";
+    std::unordered_set<std::string> exists;
     for (auto &tempString: tempToString) {
         auto temp = std::string(tempString.first.begin() + 1, tempString.first.end());
         auto string = tempString.second;
-        data += temp + ": .string \"" + string + "\"\n";
+        if (exists.find(string) == exists.end()) {
+            data += temp + ": .string \"" + string + "\"\n";
+            exists.insert(string);
+        }
     }
 
     if (!tempToString.empty()) {

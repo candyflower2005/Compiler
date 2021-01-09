@@ -50,7 +50,7 @@ int check_constexpr() {
 	if (true && false) {error();}
 	if (false && true) {error();}
 	if (false && false) {error();}
-	if (btrue() && false) {error();} // it is OK not to detect this if's condition value at compile time, because left side of ... && false may have side effects, nontheless a warning would be appreciated
+	// if (btrue() && false) {error();} // it is OK not to detect this if's condition value at compile time, because left side of ... && false may have side effects, nontheless a warning would be appreciated
 	if (false && btrue()) {error();}
 
 	if (!(true || true)) {error();}
@@ -79,8 +79,8 @@ string sabd() { return "abd"; }
 boolean btrue() { return true; }
 boolean bfalse() { return false; }
 
-void check_runtime() {
 
+void check_runtime() {
 	if (i4() + i42() != i46()) error();
 
 	if (i46() - i4() != i42()) error();
@@ -91,7 +91,6 @@ void check_runtime() {
 	if (!(i42() < i46())) error();
 	if (i46() < i42()) error();
 	if (i42() < i42()) error();
-
 
 	if (!(i42() <= i46())) error();
 	if (i46() <= i42()) error();
@@ -127,9 +126,11 @@ void check_runtime() {
 	if (btrue() && bfalse()) error();
 	if (bfalse() && btrue()) error();
 	if (bfalse() && bfalse()) error();
+	if (bfalse() && (i2() / i0() == i42())) error();
 
 	if (!(btrue() || btrue())) error();
 	if (!(btrue() || bfalse())) error();
 	if (!(bfalse() || btrue())) error();
 	if (bfalse() || bfalse()) error();
+	if (!(btrue() || (i2() / i0() == i42()))) error();
 }

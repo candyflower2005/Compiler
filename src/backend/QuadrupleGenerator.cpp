@@ -54,7 +54,6 @@ void QuadrupleGenerator::visitBlk(Blk *p) {
 
 void QuadrupleGenerator::visitListStmt(ListStmt *p) {
     for (auto &i : *p) {
-        std::cerr << "current line: " << i->line_number << std::endl;
         i->accept(this);
     }
 }

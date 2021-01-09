@@ -394,8 +394,10 @@ fun_test:
 	movl %eax, -12(%ebp)
 	movl -8(%ebp), %eax
 	movl -12(%ebp), %ebx
+	xor %ecx, %ecx
 	cmp %ebx, %eax
-	setg %al
+	setg %cl
+	mov %ecx, %eax
 	movl %eax, -16(%ebp)
 	movl -16(%ebp),  %eax
 	movl  %ebp, %esp

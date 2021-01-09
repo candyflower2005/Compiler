@@ -2,6 +2,7 @@
 #include "string.h"
 #include <stdlib.h>
 
+
 extern void fun_printInt(int n) {
     printf("%d\n", n);
 }

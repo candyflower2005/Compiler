@@ -1,9 +1,10 @@
 .data
 str4: .string "abd"
 str2: .string "abcabd"
-str3: .string "abcd"
-str0: .string "No return in a non-void function"
 str1: .string "abc"
+str3: .string "abcd"
+zeroDivMsg: .string "can't divide by 0"
+str0: .string "No return in a non-void function"
 
 .globl main
 
@@ -24,7 +25,7 @@ main:
 fun_check_constexpr:
 	push %ebp
 	movl %esp, %ebp
-	subl $452, %esp
+	subl $472, %esp
 	movl $4, %eax
 	movl %eax, -4(%ebp)
 	movl $42, %eax
@@ -44,7 +45,6 @@ if_body_block1:
 	call fun_error
 
 after_cond_block2:
-	call fun_error
 	movl $46, %eax
 	movl %eax, -20(%ebp)
 	movl $4, %eax
@@ -89,6 +89,12 @@ after_cond_block6:
 	movl %eax, -56(%ebp)
 	movl -52(%ebp), %eax
 	movl -56(%ebp), %ebx
+	cmp $0, %ebx
+	jne after_div_0
+	push $zeroDivMsg
+	call fun_runTimeError
+
+after_div_0:
 	cdq
 	idiv %ebx
 	movl %eax, -60(%ebp)
@@ -541,14 +547,27 @@ if_body_block61:
 
 after_cond_block62:
 	movl $1, %eax
-	movl %eax, -344(%ebp)
+	cmp $1, %eax
+	jne LFalse_block67
+
+block65:
 	movl $1, %eax
+	cmp $1, %eax
+	jne LFalse_block67
+
+LTrue_block66:
+	movl $1, %eax
+	movl %eax, -344(%ebp)
 	movl %eax, -348(%ebp)
-	movl -344(%ebp), %eax
-	movl -348(%ebp), %ebx
-	and %ebx, %eax
+	jmp block68
+
+LFalse_block67:
+	movl $0, %eax
 	movl %eax, -352(%ebp)
-	movl -352(%ebp), %eax
+	movl %eax, -348(%ebp)
+
+block68:
+	movl -348(%ebp), %eax
 	cmp $0, %eax
 	jne after_cond_block64
 
@@ -557,168 +576,279 @@ if_body_block63:
 
 after_cond_block64:
 	movl $1, %eax
-	movl %eax, -356(%ebp)
+	cmp $1, %eax
+	jne LFalse_block73
+
+block71:
 	movl $0, %eax
+	cmp $1, %eax
+	jne LFalse_block73
+
+LTrue_block72:
+	movl $1, %eax
+	movl %eax, -356(%ebp)
 	movl %eax, -360(%ebp)
-	movl -356(%ebp), %eax
-	movl -360(%ebp), %ebx
-	andl %ebx, %eax
-	cmpl $1, %eax
-	jne after_cond_block66
-	cmpl %ebx, %eax
+	jmp block74
 
-if_body_block65:
-	call fun_error
-
-after_cond_block66:
+LFalse_block73:
 	movl $0, %eax
 	movl %eax, -364(%ebp)
-	movl $1, %eax
-	movl %eax, -368(%ebp)
-	movl -364(%ebp), %eax
-	movl -368(%ebp), %ebx
-	andl %ebx, %eax
-	cmpl $1, %eax
-	jne after_cond_block68
-	cmpl %ebx, %eax
+	movl %eax, -360(%ebp)
 
-if_body_block67:
-	call fun_error
-
-after_cond_block68:
-	movl $0, %eax
-	movl %eax, -372(%ebp)
-	movl $0, %eax
-	movl %eax, -376(%ebp)
-	movl -372(%ebp), %eax
-	movl -376(%ebp), %ebx
-	andl %ebx, %eax
+block74:
+	movl -360(%ebp), %eax
 	cmpl $1, %eax
 	jne after_cond_block70
-	cmpl %ebx, %eax
 
 if_body_block69:
 	call fun_error
 
 after_cond_block70:
-	call fun_btrue
-	movl %eax, -380(%ebp)
 	movl $0, %eax
-	movl %eax, -384(%ebp)
-	movl -380(%ebp), %eax
-	movl -384(%ebp), %ebx
-	andl %ebx, %eax
-	cmpl $1, %eax
-	jne after_cond_block72
-	cmpl %ebx, %eax
+	cmp $1, %eax
+	jne LFalse_block79
 
-if_body_block71:
-	call fun_error
+block77:
+	movl $1, %eax
+	cmp $1, %eax
+	jne LFalse_block79
 
-after_cond_block72:
+LTrue_block78:
+	movl $1, %eax
+	movl %eax, -368(%ebp)
+	movl %eax, -372(%ebp)
+	jmp block80
+
+LFalse_block79:
 	movl $0, %eax
-	movl %eax, -388(%ebp)
-	call fun_btrue
-	movl %eax, -392(%ebp)
-	movl -388(%ebp), %eax
-	movl -392(%ebp), %ebx
-	andl %ebx, %eax
+	movl %eax, -376(%ebp)
+	movl %eax, -372(%ebp)
+
+block80:
+	movl -372(%ebp), %eax
 	cmpl $1, %eax
-	jne after_cond_block74
-	cmpl %ebx, %eax
-
-if_body_block73:
-	call fun_error
-
-after_cond_block74:
-	movl $1, %eax
-	movl %eax, -396(%ebp)
-	movl $1, %eax
-	movl %eax, -400(%ebp)
-	movl -396(%ebp), %eax
-	movl -400(%ebp), %ebx
-	or %ebx, %eax
-	movl %eax, -404(%ebp)
-	movl -404(%ebp), %eax
-	cmp $0, %eax
 	jne after_cond_block76
 
 if_body_block75:
 	call fun_error
 
 after_cond_block76:
+	movl $0, %eax
+	cmp $1, %eax
+	jne LFalse_block85
+
+block83:
+	movl $0, %eax
+	cmp $1, %eax
+	jne LFalse_block85
+
+LTrue_block84:
 	movl $1, %eax
-	movl %eax, -408(%ebp)
-	movl $0, %eax
-	movl %eax, -412(%ebp)
-	movl -408(%ebp), %eax
-	movl -412(%ebp), %ebx
-	or %ebx, %eax
-	movl %eax, -416(%ebp)
-	movl -416(%ebp), %eax
-	cmp $0, %eax
-	jne after_cond_block78
+	movl %eax, -380(%ebp)
+	movl %eax, -384(%ebp)
+	jmp block86
 
-if_body_block77:
-	call fun_error
-
-after_cond_block78:
+LFalse_block85:
 	movl $0, %eax
-	movl %eax, -420(%ebp)
-	movl $1, %eax
-	movl %eax, -424(%ebp)
-	movl -420(%ebp), %eax
-	movl -424(%ebp), %ebx
-	or %ebx, %eax
-	movl %eax, -428(%ebp)
-	movl -428(%ebp), %eax
-	cmp $0, %eax
-	jne after_cond_block80
+	movl %eax, -388(%ebp)
+	movl %eax, -384(%ebp)
 
-if_body_block79:
-	call fun_error
-
-after_cond_block80:
-	movl $0, %eax
-	movl %eax, -432(%ebp)
-	movl $0, %eax
-	movl %eax, -436(%ebp)
-	movl -432(%ebp), %eax
-	movl -436(%ebp), %ebx
-	orl %ebx, %eax
+block86:
+	movl -384(%ebp), %eax
 	cmpl $1, %eax
 	jne after_cond_block82
-	cmpl %ebx, %eax
 
 if_body_block81:
 	call fun_error
 
 after_cond_block82:
+	movl $0, %eax
+	cmp $1, %eax
+	jne LFalse_block91
+
+block89:
+	call fun_btrue
+	movl %eax, -392(%ebp)
+	movl -392(%ebp), %eax
+	cmpl $1, %eax
+	jne LFalse_block91
+
+LTrue_block90:
+	movl $1, %eax
+	movl %eax, -396(%ebp)
+	movl %eax, -400(%ebp)
+	jmp block92
+
+LFalse_block91:
+	movl $0, %eax
+	movl %eax, -404(%ebp)
+	movl %eax, -400(%ebp)
+
+block92:
+	movl -400(%ebp), %eax
+	cmpl $1, %eax
+	jne after_cond_block88
+
+if_body_block87:
+	call fun_error
+
+after_cond_block88:
+	movl $1, %eax
+	cmp $1, %eax
+	je LTrue_block96
+
+block95:
+	movl $1, %eax
+	cmp $1, %eax
+	je LTrue_block96
+
+LFalse_block97:
+	movl $0, %eax
+	movl %eax, -408(%ebp)
+	movl %eax, -412(%ebp)
+	jmp block98
+
+LTrue_block96:
+	movl $1, %eax
+	movl %eax, -416(%ebp)
+	movl %eax, -412(%ebp)
+
+block98:
+	movl -412(%ebp), %eax
+	cmp $0, %eax
+	jne after_cond_block94
+
+if_body_block93:
+	call fun_error
+
+after_cond_block94:
+	movl $1, %eax
+	cmp $1, %eax
+	je LTrue_block102
+
+block101:
+	movl $0, %eax
+	cmp $1, %eax
+	je LTrue_block102
+
+LFalse_block103:
+	movl $0, %eax
+	movl %eax, -420(%ebp)
+	movl %eax, -424(%ebp)
+	jmp block104
+
+LTrue_block102:
+	movl $1, %eax
+	movl %eax, -428(%ebp)
+	movl %eax, -424(%ebp)
+
+block104:
+	movl -424(%ebp), %eax
+	cmp $0, %eax
+	jne after_cond_block100
+
+if_body_block99:
+	call fun_error
+
+after_cond_block100:
+	movl $0, %eax
+	cmp $1, %eax
+	je LTrue_block108
+
+block107:
+	movl $1, %eax
+	cmp $1, %eax
+	je LTrue_block108
+
+LFalse_block109:
+	movl $0, %eax
+	movl %eax, -432(%ebp)
+	movl %eax, -436(%ebp)
+	jmp block110
+
+LTrue_block108:
 	movl $1, %eax
 	movl %eax, -440(%ebp)
-	call fun_bfalse
-	movl %eax, -444(%ebp)
-	movl -440(%ebp), %eax
-	movl -444(%ebp), %ebx
-	or %ebx, %eax
-	movl %eax, -448(%ebp)
-	movl -448(%ebp), %eax
+	movl %eax, -436(%ebp)
+
+block110:
+	movl -436(%ebp), %eax
 	cmp $0, %eax
-	jne else_body_block84
+	jne after_cond_block106
 
-if_body_block83:
+if_body_block105:
 	call fun_error
-	jmp after_cond_block85
 
-else_body_block84:
+after_cond_block106:
 	movl $0, %eax
+	cmp $1, %eax
+	je LTrue_block114
+
+block113:
+	movl $0, %eax
+	cmp $1, %eax
+	je LTrue_block114
+
+LFalse_block115:
+	movl $0, %eax
+	movl %eax, -444(%ebp)
+	movl %eax, -448(%ebp)
+	jmp block116
+
+LTrue_block114:
+	movl $1, %eax
 	movl %eax, -452(%ebp)
-	movl -452(%ebp),  %eax
+	movl %eax, -448(%ebp)
+
+block116:
+	movl -448(%ebp), %eax
+	cmpl $1, %eax
+	jne after_cond_block112
+
+if_body_block111:
+	call fun_error
+
+after_cond_block112:
+	movl $1, %eax
+	cmp $1, %eax
+	je LTrue_block121
+
+block120:
+	call fun_bfalse
+	movl %eax, -456(%ebp)
+	movl -456(%ebp), %eax
+	cmpl $1, %eax
+	je LTrue_block121
+
+LFalse_block122:
+	movl $0, %eax
+	movl %eax, -460(%ebp)
+	movl %eax, -464(%ebp)
+	jmp block123
+
+LTrue_block121:
+	movl $1, %eax
+	movl %eax, -468(%ebp)
+	movl %eax, -464(%ebp)
+
+block123:
+	movl -464(%ebp), %eax
+	cmp $0, %eax
+	jne else_body_block118
+
+if_body_block117:
+	call fun_error
+	jmp after_cond_block119
+
+else_body_block118:
+	movl $0, %eax
+	movl %eax, -472(%ebp)
+	movl -472(%ebp),  %eax
 	movl  %ebp, %esp
 	pop %ebp
 	ret
 
-after_cond_block85:
+after_cond_block119:
 	push $str0
 	call fun_runTimeError
 	add $4, %esp
@@ -869,7 +999,7 @@ fun_bfalse:
 fun_check_runtime:
 	push %ebp
 	movl %esp, %ebp
-	subl $420, %esp
+	subl $564, %esp
 	call fun_i4
 	movl %eax, -4(%ebp)
 	call fun_i42
@@ -883,12 +1013,12 @@ fun_check_runtime:
 	movl -12(%ebp), %eax
 	movl -16(%ebp), %ebx
 	cmpl %ebx, %eax
-	je after_cond_block101
+	je after_cond_block139
 
-if_body_block100:
+if_body_block138:
 	call fun_error
 
-after_cond_block101:
+after_cond_block139:
 	call fun_i46
 	movl %eax, -20(%ebp)
 	call fun_i4
@@ -902,12 +1032,12 @@ after_cond_block101:
 	movl -28(%ebp), %eax
 	movl -32(%ebp), %ebx
 	cmpl %ebx, %eax
-	je after_cond_block103
+	je after_cond_block141
 
-if_body_block102:
+if_body_block140:
 	call fun_error
 
-after_cond_block103:
+after_cond_block141:
 	call fun_i46
 	movl %eax, -36(%ebp)
 	call fun_i4
@@ -921,18 +1051,24 @@ after_cond_block103:
 	movl -44(%ebp), %eax
 	movl -48(%ebp), %ebx
 	cmpl %ebx, %eax
-	je after_cond_block105
+	je after_cond_block143
 
-if_body_block104:
+if_body_block142:
 	call fun_error
 
-after_cond_block105:
+after_cond_block143:
 	call fun_i46
 	movl %eax, -52(%ebp)
 	call fun_i4
 	movl %eax, -56(%ebp)
 	movl -52(%ebp), %eax
 	movl -56(%ebp), %ebx
+	cmp $0, %ebx
+	jne after_div_1
+	push $zeroDivMsg
+	call fun_runTimeError
+
+after_div_1:
 	cdq
 	idiv %ebx
 	movl %eax, -60(%ebp)
@@ -941,12 +1077,12 @@ after_cond_block105:
 	movl -60(%ebp), %eax
 	movl -64(%ebp), %ebx
 	cmpl %ebx, %eax
-	je after_cond_block107
+	je after_cond_block145
 
-if_body_block106:
+if_body_block144:
 	call fun_error
 
-after_cond_block107:
+after_cond_block145:
 	call fun_i46
 	movl %eax, -68(%ebp)
 	call fun_i4
@@ -962,12 +1098,12 @@ after_cond_block107:
 	movl -76(%ebp), %eax
 	movl -80(%ebp), %ebx
 	cmpl %ebx, %eax
-	je after_cond_block109
+	je after_cond_block147
 
-if_body_block108:
+if_body_block146:
 	call fun_error
 
-after_cond_block109:
+after_cond_block147:
 	call fun_i42
 	movl %eax, -84(%ebp)
 	call fun_i46
@@ -981,12 +1117,12 @@ after_cond_block109:
 	movl %eax, -92(%ebp)
 	movl -92(%ebp), %eax
 	cmp $0, %eax
-	jne after_cond_block111
+	jne after_cond_block149
 
-if_body_block110:
+if_body_block148:
 	call fun_error
 
-after_cond_block111:
+after_cond_block149:
 	call fun_i46
 	movl %eax, -96(%ebp)
 	call fun_i42
@@ -994,12 +1130,12 @@ after_cond_block111:
 	movl -96(%ebp), %eax
 	movl -100(%ebp), %ebx
 	cmpl %ebx, %eax
-	jge after_cond_block113
+	jge after_cond_block151
 
-if_body_block112:
+if_body_block150:
 	call fun_error
 
-after_cond_block113:
+after_cond_block151:
 	call fun_i42
 	movl %eax, -104(%ebp)
 	call fun_i42
@@ -1007,12 +1143,12 @@ after_cond_block113:
 	movl -104(%ebp), %eax
 	movl -108(%ebp), %ebx
 	cmpl %ebx, %eax
-	jge after_cond_block115
+	jge after_cond_block153
 
-if_body_block114:
+if_body_block152:
 	call fun_error
 
-after_cond_block115:
+after_cond_block153:
 	call fun_i42
 	movl %eax, -112(%ebp)
 	call fun_i46
@@ -1026,12 +1162,12 @@ after_cond_block115:
 	movl %eax, -120(%ebp)
 	movl -120(%ebp), %eax
 	cmp $0, %eax
-	jne after_cond_block117
+	jne after_cond_block155
 
-if_body_block116:
+if_body_block154:
 	call fun_error
 
-after_cond_block117:
+after_cond_block155:
 	call fun_i46
 	movl %eax, -124(%ebp)
 	call fun_i42
@@ -1039,12 +1175,12 @@ after_cond_block117:
 	movl -124(%ebp), %eax
 	movl -128(%ebp), %ebx
 	cmpl %ebx, %eax
-	jg after_cond_block119
+	jg after_cond_block157
 
-if_body_block118:
+if_body_block156:
 	call fun_error
 
-after_cond_block119:
+after_cond_block157:
 	call fun_i42
 	movl %eax, -132(%ebp)
 	call fun_i42
@@ -1058,12 +1194,12 @@ after_cond_block119:
 	movl %eax, -140(%ebp)
 	movl -140(%ebp), %eax
 	cmp $0, %eax
-	jne after_cond_block121
+	jne after_cond_block159
 
-if_body_block120:
+if_body_block158:
 	call fun_error
 
-after_cond_block121:
+after_cond_block159:
 	call fun_i42
 	movl %eax, -144(%ebp)
 	call fun_i46
@@ -1071,12 +1207,12 @@ after_cond_block121:
 	movl -144(%ebp), %eax
 	movl -148(%ebp), %ebx
 	cmpl %ebx, %eax
-	jle after_cond_block123
+	jle after_cond_block161
 
-if_body_block122:
+if_body_block160:
 	call fun_error
 
-after_cond_block123:
+after_cond_block161:
 	call fun_i46
 	movl %eax, -152(%ebp)
 	call fun_i42
@@ -1090,12 +1226,12 @@ after_cond_block123:
 	movl %eax, -160(%ebp)
 	movl -160(%ebp), %eax
 	cmp $0, %eax
-	jne after_cond_block125
+	jne after_cond_block163
 
-if_body_block124:
+if_body_block162:
 	call fun_error
 
-after_cond_block125:
+after_cond_block163:
 	call fun_i42
 	movl %eax, -164(%ebp)
 	call fun_i42
@@ -1103,12 +1239,12 @@ after_cond_block125:
 	movl -164(%ebp), %eax
 	movl -168(%ebp), %ebx
 	cmpl %ebx, %eax
-	jle after_cond_block127
+	jle after_cond_block165
 
-if_body_block126:
+if_body_block164:
 	call fun_error
 
-after_cond_block127:
+after_cond_block165:
 	call fun_i42
 	movl %eax, -172(%ebp)
 	call fun_i46
@@ -1116,12 +1252,12 @@ after_cond_block127:
 	movl -172(%ebp), %eax
 	movl -176(%ebp), %ebx
 	cmpl %ebx, %eax
-	jl after_cond_block129
+	jl after_cond_block167
 
-if_body_block128:
+if_body_block166:
 	call fun_error
 
-after_cond_block129:
+after_cond_block167:
 	call fun_i46
 	movl %eax, -180(%ebp)
 	call fun_i42
@@ -1135,12 +1271,12 @@ after_cond_block129:
 	movl %eax, -188(%ebp)
 	movl -188(%ebp), %eax
 	cmp $0, %eax
-	jne after_cond_block131
+	jne after_cond_block169
 
-if_body_block130:
+if_body_block168:
 	call fun_error
 
-after_cond_block131:
+after_cond_block169:
 	call fun_i42
 	movl %eax, -192(%ebp)
 	call fun_i42
@@ -1154,12 +1290,12 @@ after_cond_block131:
 	movl %eax, -200(%ebp)
 	movl -200(%ebp), %eax
 	cmp $0, %eax
-	jne after_cond_block133
+	jne after_cond_block171
 
-if_body_block132:
+if_body_block170:
 	call fun_error
 
-after_cond_block133:
+after_cond_block171:
 	call fun_i42
 	movl %eax, -204(%ebp)
 	call fun_i42
@@ -1173,12 +1309,12 @@ after_cond_block133:
 	movl %eax, -212(%ebp)
 	movl -212(%ebp), %eax
 	cmp $0, %eax
-	jne after_cond_block135
+	jne after_cond_block173
 
-if_body_block134:
+if_body_block172:
 	call fun_error
 
-after_cond_block135:
+after_cond_block173:
 	call fun_i42
 	movl %eax, -216(%ebp)
 	call fun_i46
@@ -1186,12 +1322,12 @@ after_cond_block135:
 	movl -216(%ebp), %eax
 	movl -220(%ebp), %ebx
 	cmpl %ebx, %eax
-	jne after_cond_block137
+	jne after_cond_block175
 
-if_body_block136:
+if_body_block174:
 	call fun_error
 
-after_cond_block137:
+after_cond_block175:
 	call fun_i46
 	movl %eax, -224(%ebp)
 	call fun_i42
@@ -1199,12 +1335,12 @@ after_cond_block137:
 	movl -224(%ebp), %eax
 	movl -228(%ebp), %ebx
 	cmpl %ebx, %eax
-	jne after_cond_block139
+	jne after_cond_block177
 
-if_body_block138:
+if_body_block176:
 	call fun_error
 
-after_cond_block139:
+after_cond_block177:
 	call fun_btrue
 	movl %eax, -232(%ebp)
 	call fun_btrue
@@ -1218,12 +1354,12 @@ after_cond_block139:
 	movl %eax, -240(%ebp)
 	movl -240(%ebp), %eax
 	cmp $0, %eax
-	jne after_cond_block141
+	jne after_cond_block179
 
-if_body_block140:
+if_body_block178:
 	call fun_error
 
-after_cond_block141:
+after_cond_block179:
 	call fun_bfalse
 	movl %eax, -244(%ebp)
 	call fun_bfalse
@@ -1237,12 +1373,12 @@ after_cond_block141:
 	movl %eax, -252(%ebp)
 	movl -252(%ebp), %eax
 	cmp $0, %eax
-	jne after_cond_block143
+	jne after_cond_block181
 
-if_body_block142:
+if_body_block180:
 	call fun_error
 
-after_cond_block143:
+after_cond_block181:
 	call fun_btrue
 	movl %eax, -256(%ebp)
 	call fun_bfalse
@@ -1250,12 +1386,12 @@ after_cond_block143:
 	movl -256(%ebp), %eax
 	movl -260(%ebp), %ebx
 	cmpl %ebx, %eax
-	jne after_cond_block145
+	jne after_cond_block183
 
-if_body_block144:
+if_body_block182:
 	call fun_error
 
-after_cond_block145:
+after_cond_block183:
 	call fun_bfalse
 	movl %eax, -264(%ebp)
 	call fun_btrue
@@ -1263,12 +1399,12 @@ after_cond_block145:
 	movl -264(%ebp), %eax
 	movl -268(%ebp), %ebx
 	cmpl %ebx, %eax
-	jne after_cond_block147
+	jne after_cond_block185
 
-if_body_block146:
+if_body_block184:
 	call fun_error
 
-after_cond_block147:
+after_cond_block185:
 	call fun_i42
 	movl %eax, -272(%ebp)
 	call fun_i42
@@ -1276,12 +1412,12 @@ after_cond_block147:
 	movl -272(%ebp), %eax
 	movl -276(%ebp), %ebx
 	cmpl %ebx, %eax
-	je after_cond_block149
+	je after_cond_block187
 
-if_body_block148:
+if_body_block186:
 	call fun_error
 
-after_cond_block149:
+after_cond_block187:
 	call fun_i42
 	movl %eax, -280(%ebp)
 	call fun_i46
@@ -1295,12 +1431,12 @@ after_cond_block149:
 	movl %eax, -288(%ebp)
 	movl -288(%ebp), %eax
 	cmp $0, %eax
-	jne after_cond_block151
+	jne after_cond_block189
 
-if_body_block150:
+if_body_block188:
 	call fun_error
 
-after_cond_block151:
+after_cond_block189:
 	call fun_i46
 	movl %eax, -292(%ebp)
 	call fun_i42
@@ -1314,12 +1450,12 @@ after_cond_block151:
 	movl %eax, -300(%ebp)
 	movl -300(%ebp), %eax
 	cmp $0, %eax
-	jne after_cond_block153
+	jne after_cond_block191
 
-if_body_block152:
+if_body_block190:
 	call fun_error
 
-after_cond_block153:
+after_cond_block191:
 	call fun_btrue
 	movl %eax, -304(%ebp)
 	call fun_btrue
@@ -1327,12 +1463,12 @@ after_cond_block153:
 	movl -304(%ebp), %eax
 	movl -308(%ebp), %ebx
 	cmpl %ebx, %eax
-	je after_cond_block155
+	je after_cond_block193
 
-if_body_block154:
+if_body_block192:
 	call fun_error
 
-after_cond_block155:
+after_cond_block193:
 	call fun_bfalse
 	movl %eax, -312(%ebp)
 	call fun_bfalse
@@ -1340,12 +1476,12 @@ after_cond_block155:
 	movl -312(%ebp), %eax
 	movl -316(%ebp), %ebx
 	cmpl %ebx, %eax
-	je after_cond_block157
+	je after_cond_block195
 
-if_body_block156:
+if_body_block194:
 	call fun_error
 
-after_cond_block157:
+after_cond_block195:
 	call fun_btrue
 	movl %eax, -320(%ebp)
 	call fun_bfalse
@@ -1359,12 +1495,12 @@ after_cond_block157:
 	movl %eax, -328(%ebp)
 	movl -328(%ebp), %eax
 	cmp $0, %eax
-	jne after_cond_block159
+	jne after_cond_block197
 
-if_body_block158:
+if_body_block196:
 	call fun_error
 
-after_cond_block159:
+after_cond_block197:
 	call fun_bfalse
 	movl %eax, -332(%ebp)
 	call fun_btrue
@@ -1378,136 +1514,374 @@ after_cond_block159:
 	movl %eax, -340(%ebp)
 	movl -340(%ebp), %eax
 	cmp $0, %eax
-	jne after_cond_block161
+	jne after_cond_block199
 
-if_body_block160:
+if_body_block198:
 	call fun_error
 
-after_cond_block161:
+after_cond_block199:
 	call fun_btrue
 	movl %eax, -344(%ebp)
+	movl -344(%ebp), %eax
+	cmpl $1, %eax
+	jne LFalse_block204
+
+block202:
 	call fun_btrue
 	movl %eax, -348(%ebp)
-	movl -344(%ebp), %eax
-	movl -348(%ebp), %ebx
-	and %ebx, %eax
+	movl -348(%ebp), %eax
+	cmpl $1, %eax
+	jne LFalse_block204
+
+LTrue_block203:
+	movl $1, %eax
 	movl %eax, -352(%ebp)
-	movl -352(%ebp), %eax
-	cmp $0, %eax
-	jne after_cond_block163
-
-if_body_block162:
-	call fun_error
-
-after_cond_block163:
-	call fun_btrue
 	movl %eax, -356(%ebp)
-	call fun_bfalse
+	jmp block205
+
+LFalse_block204:
+	movl $0, %eax
 	movl %eax, -360(%ebp)
+	movl %eax, -356(%ebp)
+
+block205:
 	movl -356(%ebp), %eax
-	movl -360(%ebp), %ebx
-	andl %ebx, %eax
-	cmpl $1, %eax
-	jne after_cond_block165
-	cmpl %ebx, %eax
+	cmp $0, %eax
+	jne after_cond_block201
 
-if_body_block164:
+if_body_block200:
 	call fun_error
 
-after_cond_block165:
-	call fun_bfalse
+after_cond_block201:
+	call fun_btrue
 	movl %eax, -364(%ebp)
-	call fun_btrue
-	movl %eax, -368(%ebp)
 	movl -364(%ebp), %eax
-	movl -368(%ebp), %ebx
-	andl %ebx, %eax
 	cmpl $1, %eax
-	jne after_cond_block167
-	cmpl %ebx, %eax
+	jne LFalse_block210
 
-if_body_block166:
-	call fun_error
-
-after_cond_block167:
+block208:
 	call fun_bfalse
+	movl %eax, -368(%ebp)
+	movl -368(%ebp), %eax
+	cmpl $1, %eax
+	jne LFalse_block210
+
+LTrue_block209:
+	movl $1, %eax
 	movl %eax, -372(%ebp)
-	call fun_bfalse
 	movl %eax, -376(%ebp)
-	movl -372(%ebp), %eax
-	movl -376(%ebp), %ebx
-	andl %ebx, %eax
-	cmpl $1, %eax
-	jne after_cond_block169
-	cmpl %ebx, %eax
+	jmp block211
 
-if_body_block168:
+LFalse_block210:
+	movl $0, %eax
+	movl %eax, -380(%ebp)
+	movl %eax, -376(%ebp)
+
+block211:
+	movl -376(%ebp), %eax
+	cmpl $1, %eax
+	jne after_cond_block207
+
+if_body_block206:
 	call fun_error
 
-after_cond_block169:
-	call fun_btrue
-	movl %eax, -380(%ebp)
-	call fun_btrue
+after_cond_block207:
+	call fun_bfalse
 	movl %eax, -384(%ebp)
-	movl -380(%ebp), %eax
-	movl -384(%ebp), %ebx
-	or %ebx, %eax
+	movl -384(%ebp), %eax
+	cmpl $1, %eax
+	jne LFalse_block216
+
+block214:
+	call fun_btrue
 	movl %eax, -388(%ebp)
 	movl -388(%ebp), %eax
-	cmp $0, %eax
-	jne after_cond_block171
+	cmpl $1, %eax
+	jne LFalse_block216
 
-if_body_block170:
-	call fun_error
-
-after_cond_block171:
-	call fun_btrue
+LTrue_block215:
+	movl $1, %eax
 	movl %eax, -392(%ebp)
-	call fun_bfalse
 	movl %eax, -396(%ebp)
-	movl -392(%ebp), %eax
-	movl -396(%ebp), %ebx
-	or %ebx, %eax
-	movl %eax, -400(%ebp)
-	movl -400(%ebp), %eax
-	cmp $0, %eax
-	jne after_cond_block173
+	jmp block217
 
-if_body_block172:
+LFalse_block216:
+	movl $0, %eax
+	movl %eax, -400(%ebp)
+	movl %eax, -396(%ebp)
+
+block217:
+	movl -396(%ebp), %eax
+	cmpl $1, %eax
+	jne after_cond_block213
+
+if_body_block212:
 	call fun_error
 
-after_cond_block173:
+after_cond_block213:
 	call fun_bfalse
 	movl %eax, -404(%ebp)
-	call fun_btrue
-	movl %eax, -408(%ebp)
 	movl -404(%ebp), %eax
-	movl -408(%ebp), %ebx
-	or %ebx, %eax
-	movl %eax, -412(%ebp)
-	movl -412(%ebp), %eax
-	cmp $0, %eax
-	jne after_cond_block175
-
-if_body_block174:
-	call fun_error
-
-after_cond_block175:
-	call fun_bfalse
-	movl %eax, -416(%ebp)
-	call fun_bfalse
-	movl %eax, -420(%ebp)
-	movl -416(%ebp), %eax
-	movl -420(%ebp), %ebx
-	orl %ebx, %eax
 	cmpl $1, %eax
-	jne after_cond_block177
-	cmpl %ebx, %eax
+	jne LFalse_block222
 
-if_body_block176:
+block220:
+	call fun_bfalse
+	movl %eax, -408(%ebp)
+	movl -408(%ebp), %eax
+	cmpl $1, %eax
+	jne LFalse_block222
+
+LTrue_block221:
+	movl $1, %eax
+	movl %eax, -412(%ebp)
+	movl %eax, -416(%ebp)
+	jmp block223
+
+LFalse_block222:
+	movl $0, %eax
+	movl %eax, -420(%ebp)
+	movl %eax, -416(%ebp)
+
+block223:
+	movl -416(%ebp), %eax
+	cmpl $1, %eax
+	jne after_cond_block219
+
+if_body_block218:
 	call fun_error
 
-after_cond_block177:
+after_cond_block219:
+	call fun_bfalse
+	movl %eax, -424(%ebp)
+	movl -424(%ebp), %eax
+	cmpl $1, %eax
+	jne LFalse_block228
+
+block226:
+	call fun_i2
+	movl %eax, -428(%ebp)
+	call fun_i0
+	movl %eax, -432(%ebp)
+	movl -428(%ebp), %eax
+	movl -432(%ebp), %ebx
+	cmp $0, %ebx
+	jne after_div_2
+	push $zeroDivMsg
+	call fun_runTimeError
+
+after_div_2:
+	cdq
+	idiv %ebx
+	movl %eax, -436(%ebp)
+	call fun_i42
+	movl %eax, -440(%ebp)
+	movl -436(%ebp), %eax
+	movl -440(%ebp), %ebx
+	cmpl %ebx, %eax
+	jne LFalse_block228
+
+LTrue_block227:
+	movl $1, %eax
+	movl %eax, -444(%ebp)
+	movl %eax, -448(%ebp)
+	jmp block229
+
+LFalse_block228:
+	movl $0, %eax
+	movl %eax, -452(%ebp)
+	movl %eax, -448(%ebp)
+
+block229:
+	movl -448(%ebp), %eax
+	cmpl $1, %eax
+	jne after_cond_block225
+
+if_body_block224:
+	call fun_error
+
+after_cond_block225:
+	call fun_btrue
+	movl %eax, -456(%ebp)
+	movl -456(%ebp), %eax
+	cmpl $1, %eax
+	je LTrue_block233
+
+block232:
+	call fun_btrue
+	movl %eax, -460(%ebp)
+	movl -460(%ebp), %eax
+	cmpl $1, %eax
+	je LTrue_block233
+
+LFalse_block234:
+	movl $0, %eax
+	movl %eax, -464(%ebp)
+	movl %eax, -468(%ebp)
+	jmp block235
+
+LTrue_block233:
+	movl $1, %eax
+	movl %eax, -472(%ebp)
+	movl %eax, -468(%ebp)
+
+block235:
+	movl -468(%ebp), %eax
+	cmp $0, %eax
+	jne after_cond_block231
+
+if_body_block230:
+	call fun_error
+
+after_cond_block231:
+	call fun_btrue
+	movl %eax, -476(%ebp)
+	movl -476(%ebp), %eax
+	cmpl $1, %eax
+	je LTrue_block239
+
+block238:
+	call fun_bfalse
+	movl %eax, -480(%ebp)
+	movl -480(%ebp), %eax
+	cmpl $1, %eax
+	je LTrue_block239
+
+LFalse_block240:
+	movl $0, %eax
+	movl %eax, -484(%ebp)
+	movl %eax, -488(%ebp)
+	jmp block241
+
+LTrue_block239:
+	movl $1, %eax
+	movl %eax, -492(%ebp)
+	movl %eax, -488(%ebp)
+
+block241:
+	movl -488(%ebp), %eax
+	cmp $0, %eax
+	jne after_cond_block237
+
+if_body_block236:
+	call fun_error
+
+after_cond_block237:
+	call fun_bfalse
+	movl %eax, -496(%ebp)
+	movl -496(%ebp), %eax
+	cmpl $1, %eax
+	je LTrue_block245
+
+block244:
+	call fun_btrue
+	movl %eax, -500(%ebp)
+	movl -500(%ebp), %eax
+	cmpl $1, %eax
+	je LTrue_block245
+
+LFalse_block246:
+	movl $0, %eax
+	movl %eax, -504(%ebp)
+	movl %eax, -508(%ebp)
+	jmp block247
+
+LTrue_block245:
+	movl $1, %eax
+	movl %eax, -512(%ebp)
+	movl %eax, -508(%ebp)
+
+block247:
+	movl -508(%ebp), %eax
+	cmp $0, %eax
+	jne after_cond_block243
+
+if_body_block242:
+	call fun_error
+
+after_cond_block243:
+	call fun_bfalse
+	movl %eax, -516(%ebp)
+	movl -516(%ebp), %eax
+	cmpl $1, %eax
+	je LTrue_block251
+
+block250:
+	call fun_bfalse
+	movl %eax, -520(%ebp)
+	movl -520(%ebp), %eax
+	cmpl $1, %eax
+	je LTrue_block251
+
+LFalse_block252:
+	movl $0, %eax
+	movl %eax, -524(%ebp)
+	movl %eax, -528(%ebp)
+	jmp block253
+
+LTrue_block251:
+	movl $1, %eax
+	movl %eax, -532(%ebp)
+	movl %eax, -528(%ebp)
+
+block253:
+	movl -528(%ebp), %eax
+	cmpl $1, %eax
+	jne after_cond_block249
+
+if_body_block248:
+	call fun_error
+
+after_cond_block249:
+	call fun_btrue
+	movl %eax, -536(%ebp)
+	movl -536(%ebp), %eax
+	cmpl $1, %eax
+	je LTrue_block257
+
+block256:
+	call fun_i2
+	movl %eax, -540(%ebp)
+	call fun_i0
+	movl %eax, -544(%ebp)
+	movl -540(%ebp), %eax
+	movl -544(%ebp), %ebx
+	cmp $0, %ebx
+	jne after_div_3
+	push $zeroDivMsg
+	call fun_runTimeError
+
+after_div_3:
+	cdq
+	idiv %ebx
+	movl %eax, -548(%ebp)
+	call fun_i42
+	movl %eax, -552(%ebp)
+	movl -548(%ebp), %eax
+	movl -552(%ebp), %ebx
+	cmpl %ebx, %eax
+	je LTrue_block257
+
+LFalse_block258:
+	movl $0, %eax
+	movl %eax, -556(%ebp)
+	movl %eax, -560(%ebp)
+	jmp block259
+
+LTrue_block257:
+	movl $1, %eax
+	movl %eax, -564(%ebp)
+	movl %eax, -560(%ebp)
+
+block259:
+	movl -560(%ebp), %eax
+	cmp $0, %eax
+	jne after_cond_block255
+
+if_body_block254:
+	call fun_error
+
+after_cond_block255:
 	movl  %ebp, %esp
 	pop %ebp
 	ret

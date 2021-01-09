@@ -7,13 +7,14 @@
 
 
 class AssemblyCodeGenerator {
-    int strCount = 0;
+    int strCount = 0, afterDiv = 0;
     std::vector<General::QuadrupleBlock *> *blocks;
     std::unordered_map<Ident, General::QuadrupleBlock *> *blocksMap;
     std::unordered_map<Ident, Ident> tempToStack;
     std::unordered_map<Ident, std::string> tempToString;
     std::unordered_set<Ident> stringRegs;
     std::map<Ident, FunctionDef *> funDefs;
+
     // ins[blockame] = [in[instr_i]]
     std::unordered_map<Ident, std::vector<std::unordered_set<Ident>>> ins;
     std::unordered_map<Ident, std::vector<std::unordered_set<Ident>>> outs;
