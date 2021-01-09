@@ -13,14 +13,22 @@ extern void fun_printString(const char *str) {
 
 extern int fun_readInt() {
     int i;
-    scanf("%d", &i);
+    scanf("%d\n", &i);
     return i;
 }
 
 extern char *fun_readString() {
-    char *line = malloc(256);
-    scanf("%s", line);
-    line[strlen(line)] = '\0';
+    char *line = calloc(2048, 1);
+
+    int n;
+    getline(&line, &n, stdin);
+
+    if (line[strlen(line)-1] == '\n') {
+        line[strlen(line)-1] = '\0';
+    } else {
+        line[strlen(line)] = '\0';
+    }
+
     char *str = malloc(strlen(line));
     strcpy(str, line);
     free(line);
