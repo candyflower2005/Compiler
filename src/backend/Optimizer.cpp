@@ -113,6 +113,12 @@ void Optimizer::concatBlocks() {
                                 targetArg.changeVal(nextBlockLabel);
                             }
                         }
+                        if (instr.getInstrName() == INSTR_JUMP) {
+                            auto &targetArg = (*instr.getArgs())[0];
+                            if (targetArg.getVal() == label) {
+                                targetArg.changeVal(nextBlockLabel);
+                            }
+                        }
                     }
                 }
 
@@ -125,6 +131,7 @@ void Optimizer::concatBlocks() {
                     }
                     edges_out[inBlockLabel].erase(blockIt);
                     edges_out[inBlockLabel].push_back(nextBlockLabel);
+                    edges_in[nextBlockLabel].push_back(inBlockLabel);
                 }
 
                 auto &blockOut = edges_out[label];
@@ -136,6 +143,7 @@ void Optimizer::concatBlocks() {
                     }
                     edges_in[outBlockLabel].erase(blockIt);
                     edges_in[outBlockLabel].push_back(nextBlockLabel);
+                    edges_out[nextBlockLabel].push_back(outBlockLabel);
                 }
 
                 changed = true;
@@ -265,13 +273,14 @@ void Optimizer::optimize() {
     createGraph();
     //std::cerr << "\neliminating phis" << std::endl;
     eliminatePhi();
+    //print();
 
     //std::cerr << "\ncurrent code:" << std::endl;
 
-    //std::cerr << "\nconcating blocks" << std::endl;
+    //std::cerr << "\n\n\nconcating blocks" << std::endl;
     concatBlocks();
 
-    //std::cerr << "\nafter concat:" << std::endl;
-
+    //std::cerr << "\n\n\n\nafter concat:" << std::endl;
+    //print();
     computeDataFlow();
 }

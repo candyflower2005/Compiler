@@ -1,0 +1,8 @@
+Korzystam z kodu pośredniego w formacie SSA. Kod nie zawiera jeszcze żadnych optymalizacji, będą one dodane w późniejszym terminie.
+Z tego powodu nie skupiałem się bardzo na wydajności kodu. Przykładowo, t = a op b zawsze działa następująco:
+reg1 = load a
+reg2 = load b
+t = reg1 op reg2
+store t
+
+By rozwiązanie się kompilowało, korzystam z i686-linux-gnu-gcc zamiast gcc. Można je za to włączyć dodając 'gcc' jako drugi argument.
