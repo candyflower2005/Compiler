@@ -4,6 +4,7 @@
 #include<string>
 #include<exception>
 #include <memory>
+#include <list>
 #include "../grammar/Absyn.H"
 
 typedef std::string Ident;
@@ -210,7 +211,7 @@ namespace General {
     class QuadrupleBlock {
         blockType type;
         Ident label;
-        std::vector<Instr> instr;
+        std::list<Instr> instr;
 
     public:
         QuadrupleBlock(blockType type, Ident label) : type(type), label(std::move(label)) {}
@@ -223,7 +224,7 @@ namespace General {
 
         void print();
 
-        std::vector<Instr> *listInstr();
+        std::list<Instr> *listInstr();
     };
 
 }

@@ -17,8 +17,13 @@ void Optimizer::eliminatePhi() {
                 (*blocksMap)[label2]->addInstrBeforeJump(instr2);
             }
         }
-        std::vector<General::Instr> &curr = *(b->listInstr());
-        std::vector<General::Instr>(curr.begin() + phiCnt, curr.end()).swap(curr);
+        std::list<General::Instr> &curr = *(b->listInstr());
+        auto endIt = curr.begin();
+        for (int i = 0; i < phiCnt; i++) {
+            endIt++;
+        }
+        curr.erase(curr.begin(), endIt);
+        //std::list<General::Instr>(curr.begin() + phiCnt, curr.end()).swap(curr);
     }
 }
 
@@ -183,9 +188,10 @@ void Optimizer::computeDataFlow() {
             Ident blockName = b.first;
             //std::cerr << "Block " << blockName  << std::endl;
             int numInstr = b.second->listInstr()->size();
+            auto currIt = std::prev((*b.second->listInstr()).end());
             for (int i = numInstr - 1; i >= 0; --i) {
                 //std::cerr << "\tInstr " << i << std::endl;
-                General::Instr &currInstr = (*b.second->listInstr())[i];
+                General::Instr &currInstr = *currIt;
                 std::unordered_set<Ident> kill_i{};
                 std::unordered_set<Ident> use_i{};
 
@@ -214,6 +220,7 @@ void Optimizer::computeDataFlow() {
                 if (i > 0) {
                     outs[blockName][i - 1] = in_i;
                 }
+                currIt--;
             }
         }
 
@@ -266,11 +273,97 @@ void Optimizer::print() {
     }
 }
 
+Ident findVal(Ident tempName, std::unordered_map<Ident, Ident> &constVals) {
+    if (constVals[tempName] == "-1") {
+        return tempName;
+    }
+    constVals[tempName] = findVal(constVals[tempName], constVals);
+    return constVals[tempName];
+}
+
+Ident unionVals(Ident temp1Name, Ident temp2Name, std::unordered_map<Ident, Ident> &constVals) {
+    constVals[temp1Name] = temp2Name;
+}
+
+bool Optimizer::copyPropagation() {
+    std::unordered_map<Ident, Ident> constVals;
+    for (auto &b: *blocks) {
+        for (auto &instr: *b->listInstr()) {
+            if (instr.getOpName() == OP_ASSIGNMENT) {
+                auto arg0 = (*instr.getArgs())[0];
+                if (arg0.print() == "register") {
+                    Ident name1 = instr.getRes()->getVal(), name2 = arg0.getVal();
+                    if (constVals.find(name1) == constVals.end()) {
+                        constVals[name1] = "-1";
+                    }
+                    if (constVals.find(name2) == constVals.end()) {
+                        constVals[name2] ="-1";
+                    }
+                    auto par1 = findVal(name1, constVals);
+                    auto par2 = findVal(name2, constVals);
+                    unionVals(par1, par2, constVals);
+                }
+            }
+        }
+    }
+
+    bool changed = false;
+    for (auto &b: *blocks) {
+        auto currIt = b->listInstr()->begin();
+        while (currIt != b->listInstr()->end()) {
+            auto &instr = *currIt;
+            if (instr.getOpName() == OP_ASSIGNMENT) {
+                auto arg0 = (*instr.getArgs())[0];
+                if (arg0.print() == "register") {
+                    currIt++;
+                    b->listInstr()->erase(std::prev(currIt));
+                    continue;
+                }
+            }
+            else {
+                auto &args = *instr.getArgs();
+                for (auto &arg: args) {
+                    if (arg.print() == "register" && constVals.find(arg.getVal()) != constVals.end()) {
+                        auto res = constVals[arg.getVal()];
+                        if (res != "-1") {
+                            std::cerr << arg.getVal() << " -> " << res << std::endl;
+                            arg.changeVal(res);
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            currIt++;
+        }
+    }
+    return changed;
+}
+
+bool Optimizer::constPropagation() {
+    return false;
+}
+
+bool Optimizer::commonSubexpressionElimination() {
+    return false;
+}
+
 void Optimizer::optimize() {
-    //std::cerr << "\n\n\n\n\nOptimizer:\n" << std::endl;
+    std::cerr << "\n\n\n\n\nOptimizer:\n" << std::endl;
+    print();
+
+    bool changed = true;
+    while (changed) {
+        changed = false;
+        changed |= copyPropagation();
+        changed |= constPropagation();
+        changed |= commonSubexpressionElimination();
+    }
+
+    print();
 
     //std::cerr << "\ncreating graph" << std::endl;
     createGraph();
+    //print();
     //std::cerr << "\neliminating phis" << std::endl;
     eliminatePhi();
     //print();

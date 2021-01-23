@@ -1,7 +1,15 @@
+/* Test arithmetic and comparisons. */
+
 int main() {
-	return 0;
+    return 0 ;
 }
 
-int test_error() {
-	error();
+void printBool(boolean b) {
+  if (b) {
+    printString("true");
+    return;
+  } else {
+    printString("false");
+    return;
+ }
 }

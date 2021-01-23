@@ -352,25 +352,23 @@ block31:
 fun_printBool:
 	push %ebp
 	movl %esp, %ebp
-	subl $12, %esp
+	subl $8, %esp
 	movl 8(%ebp), %eax
-	movl %eax, -4(%ebp)
-	movl -4(%ebp), %eax
 	cmp $0, %eax
 	jne else_body_block34
 
 if_body_block33:
 	movl $str3, %eax
-	movl %eax, -8(%ebp)
-	push -8(%ebp)
+	movl %eax, -4(%ebp)
+	push -4(%ebp)
 	call fun_printString
 	add $4, %esp
 	jmp after_cond_block35
 
 else_body_block34:
 	movl $str4, %eax
-	movl %eax, -12(%ebp)
-	push -12(%ebp)
+	movl %eax, -8(%ebp)
+	push -8(%ebp)
 	call fun_printString
 	add $4, %esp
 
@@ -382,24 +380,20 @@ after_cond_block35:
 fun_test:
 	push %ebp
 	movl %esp, %ebp
-	subl $16, %esp
-	movl 8(%ebp), %eax
-	movl %eax, -4(%ebp)
-	push -4(%ebp)
+	subl $8, %esp
+	push 8(%ebp)
 	call fun_printInt
 	add $4, %esp
-	movl 8(%ebp), %eax
-	movl %eax, -8(%ebp)
 	movl $0, %eax
-	movl %eax, -12(%ebp)
-	movl -8(%ebp), %eax
-	movl -12(%ebp), %ebx
+	movl %eax, -4(%ebp)
+	movl 8(%ebp), %eax
+	movl -4(%ebp), %ebx
 	xor %ecx, %ecx
 	cmp %ebx, %eax
 	setg %cl
 	mov %ecx, %eax
-	movl %eax, -16(%ebp)
-	movl -16(%ebp),  %eax
+	movl %eax, -8(%ebp)
+	movl -8(%ebp),  %eax
 	movl  %ebp, %esp
 	pop %ebp
 	ret

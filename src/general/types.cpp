@@ -117,13 +117,10 @@ OR::OR() {
 
 void QuadrupleBlock::addInstr(Instr singleInstr, bool start) {
     if (start) {
-        std::vector<General::Instr> newInstr;
-        newInstr.push_back(singleInstr);
-        newInstr.insert(newInstr.end(), instr.begin(), instr.end());
-        instr = newInstr;
-        return;
+        instr.push_front(singleInstr);
+    } else {
+        instr.push_back(singleInstr);
     }
-    instr.push_back(singleInstr);
 }
 
 void Instr::print() {
@@ -184,8 +181,8 @@ void Instr::print() {
 
 void QuadrupleBlock::print() {
     std::cout << label + ":" << std::endl;
-    for (size_t i = 0; i < instr.size(); i++) {
-        instr[i].print();
+    for (auto &singleInstr: instr) {
+        singleInstr.print();
     }
 }
 
@@ -193,7 +190,7 @@ Ident QuadrupleBlock::getLabel() {
     return label;
 }
 
-std::vector<Instr> *QuadrupleBlock::listInstr() {
+std::list<Instr> *QuadrupleBlock::listInstr() {
     return &instr;
 }
 

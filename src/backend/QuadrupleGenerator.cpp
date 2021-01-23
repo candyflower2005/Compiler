@@ -78,6 +78,7 @@ void QuadrupleGenerator::visitBStmt(BStmt *p) {
         env.generatePhiInstr(newBlockLabel, localEnv, lastBlockLabel, localEnv, lastBlockLabel, newBlockLabel);
     } else {
         QuadrupleGenerator newQGen(p->block_, env, currBlock);
+        currBlock = newQGen.currBlock;
     }
 }
 
@@ -215,8 +216,8 @@ void QuadrupleGenerator::visitCond(Cond *p) {
 
     // If cond
     p->expr_->accept(this);
-    auto &lastInstr = (*currBlock->listInstr())[currBlock->listInstr()->size() - 1];
-    lastInstr.setUsedInJump(true);
+    auto &lastInstr = *std::prev((*currBlock->listInstr()).end());
+    //lastInstr.setUsedInJump(true);
 
     auto jumpTarget = General::String(afterCondLabel);
     auto jump = General::Instr(INSTR_IF_NOT_JUMP, OP_NULL, General::Type(""),
@@ -244,8 +245,8 @@ void QuadrupleGenerator::visitCondElse(CondElse *p) {
 
     // Cond
     p->expr_->accept(this);
-    auto &lastInstr = (*currBlock->listInstr())[currBlock->listInstr()->size() - 1];
-    lastInstr.setUsedInJump(true);
+    auto &lastInstr = *std::prev((*currBlock->listInstr()).end());
+    //lastInstr.setUsedInJump(true);
     auto condJumpTarget = General::String(elseCondLabel);
     auto condJump = General::Instr(INSTR_IF_NOT_JUMP, OP_NULL, General::Type(""),
                                    argsType{env.getRecentRegister(), condJumpTarget});
@@ -285,8 +286,8 @@ void QuadrupleGenerator::visitWhile(While *p) {
     // Loop cond
     env.addNewBlock(condLabel, newCondBlock);
     QuadrupleGenerator newCondQGen(p->expr_, env, newCondBlock);
-    auto &lastInstr = (*newCondQGen.currBlock->listInstr())[newCondQGen.currBlock->listInstr()->size() - 1];
-    lastInstr.setUsedInJump(true);
+    auto &lastInstr = *std::prev((*newCondQGen.currBlock->listInstr()).end());
+    //lastInstr.setUsedInJump(true);
     auto condJumpTarget = General::String(afterWhileLabel);
     auto condJump = General::Instr(INSTR_IF_NOT_JUMP, OP_NULL, General::Type(""),
                                    argsType{env.getRecentRegister(), condJumpTarget});
@@ -460,8 +461,8 @@ void QuadrupleGenerator::visitEAnd(EAnd *p) {
     auto restBlock = new General::QuadrupleBlock(General::NORMAL, restLabel);
 
     p->expr_1->accept(this);
-    auto &lastInstr = (*currBlock->listInstr())[currBlock->listInstr()->size() - 1];
-    lastInstr.setUsedInJump(true);
+    auto &lastInstr = *std::prev((*currBlock->listInstr()).end());
+    //lastInstr.setUsedInJump(true);
     auto arg1 = env.getRecentRegister();
 
     auto firstCondJump = General::Instr(INSTR_IF_NOT_JUMP, OP_NULL, General::Type(""), argsType{arg1, falseLabel});
@@ -470,8 +471,8 @@ void QuadrupleGenerator::visitEAnd(EAnd *p) {
     env.addNewBlock(secondCondLabel, secondCondBlock);
     General::QuadrupleEnvironment &localEnv(env);
     QuadrupleGenerator newQGenCond2(p->expr_2, localEnv, secondCondBlock);
-    auto &secondlastInstr = (*newQGenCond2.currBlock->listInstr())[newQGenCond2.currBlock->listInstr()->size() - 1];
-    secondlastInstr.setUsedInJump(true);
+    auto &secondLastInstr = *std::prev((*newQGenCond2.currBlock->listInstr()).end());
+    //secondLastInstr.setUsedInJump(true);
     auto arg2 = env.getRecentRegister();
     auto secondCondJump = General::Instr(INSTR_IF_NOT_JUMP, OP_NULL, General::Type(""), argsType{arg2, falseLabel});
     newQGenCond2.currBlock->addInstr(secondCondJump);
@@ -498,18 +499,6 @@ void QuadrupleGenerator::visitEAnd(EAnd *p) {
     restBlock->addInstr(phiInstr);
 
     //(*varValues)[it.first] = newTemp;
-
-// TODO zmienić and i or na (albo i nie, bo to jest trudne do zaimplementowania, jak już, to dla cond i condelse)
-/*
- if not w1 goto Lfalse
- if not w2 goto Lfalse
- code for Ltrue
-
- if w1 goto Ltrue
- if w2 goto Ltrue
- code for Lfalse
-
- */
 }
 
 void QuadrupleGenerator::visitEOr(EOr *p) {
@@ -523,8 +512,8 @@ void QuadrupleGenerator::visitEOr(EOr *p) {
     auto restBlock = new General::QuadrupleBlock(General::NORMAL, restLabel);
 
     p->expr_1->accept(this);
-    auto &lastInstr = (*currBlock->listInstr())[currBlock->listInstr()->size() - 1];
-    lastInstr.setUsedInJump(true);
+    auto &lastInstr = *std::prev((*currBlock->listInstr()).end());
+    //lastInstr.setUsedInJump(true);
     auto arg1 = env.getRecentRegister();
 
     auto firstCondJump = General::Instr(INSTR_IF_JUMP, OP_NULL, General::Type(""), argsType{arg1, trueLabel});
@@ -533,8 +522,8 @@ void QuadrupleGenerator::visitEOr(EOr *p) {
     env.addNewBlock(secondCondLabel, secondCondBlock);
     General::QuadrupleEnvironment &localEnv(env);
     QuadrupleGenerator newQGenCond2(p->expr_2, localEnv, secondCondBlock);
-    auto &secondlastInstr = (*newQGenCond2.currBlock->listInstr())[newQGenCond2.currBlock->listInstr()->size() - 1];
-    secondlastInstr.setUsedInJump(true);
+    auto &secondLastInstr = *std::prev((*newQGenCond2.currBlock->listInstr()).end());
+    //secondLastInstr.setUsedInJump(true);
     auto arg2 = env.getRecentRegister();
     auto secondCondJump = General::Instr(INSTR_IF_JUMP, OP_NULL, General::Type(""), argsType{arg2, trueLabel});
     newQGenCond2.currBlock->addInstr(secondCondJump);

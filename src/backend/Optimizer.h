@@ -22,6 +22,12 @@ class Optimizer {
 
     void print();
 
+    bool copyPropagation();
+
+    bool constPropagation();
+
+    bool commonSubexpressionElimination(); // both local and global
+
 public:
     Optimizer(General::QuadrupleEnvironment &env);
 

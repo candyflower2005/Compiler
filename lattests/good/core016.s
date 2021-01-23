@@ -65,7 +65,6 @@ if_body_block3:
 	movl  %ebp, %esp
 	pop %ebp
 	ret
-	jmp after_cond_block5
 
 else_body_block4:
 	movl $1, %eax

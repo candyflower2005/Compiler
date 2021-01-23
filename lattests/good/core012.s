@@ -193,7 +193,6 @@ if_body_block1:
 	movl  %ebp, %esp
 	pop %ebp
 	ret
-	jmp after_cond_block3
 
 else_body_block2:
 	movl $str4, %eax

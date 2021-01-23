@@ -1,5 +1,8 @@
 #include "AssemblyCodeGenerator.h"
 
+void allocateRegisters() {
+
+}
 
 void AssemblyCodeGenerator::handleRet(General::Instr &currInstr, std::vector<std::string> &assInstr, int &firstFree) {
     if (!currInstr.getArgs()->empty()) {
