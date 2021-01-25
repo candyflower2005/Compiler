@@ -210,15 +210,32 @@ Type *Instr::getRes() {
     return &result;
 }
 
-bool Instr::setUsedInJump(bool used) {
-    usedInJump = used;
+bool Instr::setUsedInJump() {
+    usedInJump = true;
 }
 
 bool Instr::isUsedInJump() {
     return usedInJump;
 }
 
+void Instr::setSearchForUsedInJump() {
+    searchForUsedInJump = true;
+}
+
+bool Instr::isSearchForUsedInJump() {
+    return searchForUsedInJump;
+}
+
+void Type::changeClassName(std::string newClassName) {
+    className = newClassName;
+}
+
 void QuadrupleBlock::addInstrBeforeJump(Instr singleInstr) {
+    if (instr.empty()) {
+        instr.push_back(singleInstr);
+        return;
+    }
+
     auto lastInstr = *std::prev(instr.end());
     if (lastInstr.getInstrName() == INSTR_RETURN ||
         lastInstr.getInstrName() == INSTR_JUMP ||

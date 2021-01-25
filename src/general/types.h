@@ -66,6 +66,8 @@ namespace General {
 
         void changeVal(std::string newVal);
 
+        void changeClassName(std::string newClassName);
+
         bool same(Type &);
 
         std::string &print();
@@ -185,6 +187,7 @@ namespace General {
         Type result; // either 'Register' or constant of type 'Type'
         std::vector<Type> args;
         bool usedInJump = false;
+        bool searchForUsedInJump = false;
 
     public:
         Instr(std::string instrName, std::string opName, Type result,
@@ -203,9 +206,13 @@ namespace General {
 
         Type *getRes();
 
-        bool setUsedInJump(bool used);
+        bool setUsedInJump();
 
         bool isUsedInJump();
+
+        void setSearchForUsedInJump();
+
+        bool isSearchForUsedInJump();
     };
 
     class QuadrupleBlock {

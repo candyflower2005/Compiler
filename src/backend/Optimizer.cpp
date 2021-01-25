@@ -1,4 +1,5 @@
 #include <unordered_set>
+#include <queue>
 #include "Optimizer.h"
 
 void Optimizer::eliminatePhi() {
@@ -28,6 +29,8 @@ void Optimizer::eliminatePhi() {
 }
 
 void Optimizer::createGraph() {
+    edges_in = std::unordered_map<Ident, std::vector<Ident>>();
+    edges_out = std::unordered_map<Ident, std::vector<Ident>>();
     Ident currFun;
     for (auto b = blocks->begin(); b != blocks->end(); ++b) {
         if ((*b)->getLabel().rfind("fun", 0) == 0) { // functions start with "fun_"
@@ -72,6 +75,8 @@ void Optimizer::createGraph() {
             auto nextBlockLabel = (*nextBlock)->getLabel();
             edges_out[blockLabel].push_back(nextBlockLabel);
             edges_in[nextBlockLabel].push_back(blockLabel);
+        } else if (instrName == INSTR_CALL_NO_RET && (*lastInstr->getArgs())[0].getVal() == RUN_TIME_ERROR) {
+            continue;
         } else {
             if (nextBlock == blocks->end() || (*nextBlock)->getLabel().rfind("fun", 0) == 0) {
                 if (funDefs[currFun]->getFunType().print() == "void") {
@@ -273,6 +278,33 @@ void Optimizer::print() {
     }
 }
 
+void Optimizer::setUsedInJump() {
+    for (auto &b: *blocks) {
+        auto currInstr = std::prev(b->listInstr()->end());
+        if (currInstr->getInstrName() == INSTR_IF_NOT_JUMP || currInstr->getInstrName() == INSTR_IF_JUMP) {
+            auto lastInstr = currInstr;
+            auto condTemp = (*lastInstr->getArgs())[0];
+            if (condTemp.print() == "register") {
+                bool notFound = false;
+                while (lastInstr->getRes()->getVal() != condTemp.getVal() ) {
+                    if (lastInstr == b->listInstr()->begin()) {
+                        notFound = true;
+                        break;
+                    }
+                    lastInstr--;
+                }
+                if (lastInstr->getInstrName() == INSTR_CALL_RET || lastInstr->getInstrName() == INSTR_PHI ||
+                    lastInstr->getOpName() == OP_PARAM || notFound) {
+                    continue;
+                }
+                //std::cerr << "ustawiam " << lastInstr->getRes()->getVal() << " na usedInJump" << std::endl;
+                lastInstr->setUsedInJump();
+                currInstr->setSearchForUsedInJump();
+            }
+        }
+    }
+}
+
 Ident findVal(Ident tempName, std::unordered_map<Ident, Ident> &constVals) {
     if (constVals[tempName] == "-1") {
         return tempName;
@@ -297,7 +329,7 @@ bool Optimizer::copyPropagation() {
                         constVals[name1] = "-1";
                     }
                     if (constVals.find(name2) == constVals.end()) {
-                        constVals[name2] ="-1";
+                        constVals[name2] = "-1";
                     }
                     auto par1 = findVal(name1, constVals);
                     auto par2 = findVal(name2, constVals);
@@ -319,14 +351,13 @@ bool Optimizer::copyPropagation() {
                     b->listInstr()->erase(std::prev(currIt));
                     continue;
                 }
-            }
-            else {
+            } else {
                 auto &args = *instr.getArgs();
                 for (auto &arg: args) {
                     if (arg.print() == "register" && constVals.find(arg.getVal()) != constVals.end()) {
                         auto res = constVals[arg.getVal()];
                         if (res != "-1") {
-                            std::cerr << arg.getVal() << " -> " << res << std::endl;
+                            //std::cerr << arg.getVal() << " -> " << res << std::endl;
                             arg.changeVal(res);
                             changed = true;
                         }
@@ -340,40 +371,296 @@ bool Optimizer::copyPropagation() {
 }
 
 bool Optimizer::constPropagation() {
-    return false;
+    std::unordered_map<Ident, std::pair<std::string, std::string>> constVals; // (val, className)
+    bool changed = false;
+    for (auto &b: *blocks) {
+        auto instrIt = b->listInstr()->begin();
+        //std::cerr << "block " << b->getLabel() << std::endl;
+        while (instrIt != b->listInstr()->end()) {
+            auto &instr = *instrIt;
+            if (instr.getInstrName() == INSTR_ASSIGNMENT) {
+                //std::cerr << "instr z res=" << instr.getRes()->getVal() << std::endl;
+                bool allConst = true;
+                for (auto &arg: (*instr.getArgs())) {
+                    if (!arg.getIsConst()) {
+                        auto argName = arg.getVal();
+                        if (constVals.find(argName) != constVals.end()) {
+                            auto newVal = constVals[argName];
+                            //std::cerr << "\tzmieniam " << arg.getVal() << " na " << newVal.first << std::endl;
+                            arg.changeVal(newVal.first);
+                            arg.changeClassName(newVal.second);
+                            arg.setIsConst(true);
+                            changed = true;
+                        } else {
+                            allConst = false;
+                        }
+                    }
+                }
+                if (allConst) {
+                    auto &args = *instr.getArgs();
+                    auto opName = instr.getOpName();
+                    auto resName = instr.getRes()->getVal();
+                    if (opName == OP_ASSIGNMENT) {
+                        constVals[resName] = std::make_pair(args[0].getVal(), args[0].print());
+                    } else if (opName == OP_TIMES || opName == OP_MINUS || opName == OP_PLUS || opName == OP_DIV ||
+                               opName == OP_MOD) {
+                        if (opName == OP_PLUS && args[0].print() == "string") {
+                            auto val0 = args[0].getVal(), val1 = args[1].getVal();
+                            auto res = val0 + val1;
+                            constVals[resName] = std::make_pair(General::String(res).getVal(), "string");
+                        } else {
+                            auto val0 = std::stoi(args[0].getVal()), val1 = std::stoi(args[1].getVal());
+                            int res;
+                            if (opName == OP_TIMES) {
+                                res = val0 * val1;
+                            } else if (opName == OP_MINUS) {
+                                res = val0 - val1;
+                            } else if (opName == OP_PLUS) {
+                                res = val0 + val1;
+                            } else if (opName == OP_DIV) {
+                                res = val0 / val1;
+                            } else if (opName == OP_MOD) {
+                                res = val0 % val1;
+                            }
+                            constVals[resName] = std::make_pair(General::Int(res).getVal(), "int");
+                        }
+                    } else if (opName == OP_NEG) {
+                        auto val0 = std::stoi(args[0].getVal());
+                        auto res = -val0;
+                        constVals[resName] = std::make_pair(General::Int(res).getVal(), "int");
+                    } else if (opName == OP_LTH || opName == OP_LE || opName == OP_GTH || opName == OP_GE ||
+                               opName == OP_EQU || opName == OP_NE) {
+                        auto val0 = std::stoi(args[0].getVal()), val1 = std::stoi(args[1].getVal());
+                        bool res;
+                        if (opName == OP_LTH) {
+                            res = val0 < val1;
+                        } else if (opName == OP_LE) {
+                            res = val0 <= val1;
+                        } else if (opName == OP_GTH) {
+                            res = val0 > val1;
+                        } else if (opName == OP_GE) {
+                            res = val0 >= val1;
+                        } else if (opName == OP_EQU) {
+                            res = val0 == val1;
+                        } else if (opName == OP_NE) {
+                            res = val0 != val1;
+                        }
+                        constVals[resName] = std::make_pair(General::Bool(res).getVal(), "bool");
+                    } else if (opName == OP_NOT) {
+                        auto val0 = bool(std::stoi(args[0].getVal()));
+                        bool res = !val0;
+                        constVals[resName] = std::make_pair(General::Bool(res).getVal(), "bool");
+                    } else {
+                        instrIt++;
+                        continue;
+                    }
+                    instrIt++;
+                    //std::cerr << "usuwam " << (*std::prev(instrIt)).getRes()->getVal() << std::endl;
+                    b->listInstr()->erase(std::prev(instrIt));
+                } else {
+                    instrIt++;
+                }
+            } else {
+                instrIt++;
+            }
+        }
+    }
+
+    for (auto &b: *blocks) {
+        for (auto &instr: *b->listInstr()) {
+            for (auto &arg: (*instr.getArgs())) {
+                if (!arg.getIsConst()) {
+                    auto argName = arg.getVal();
+                    if (constVals.find(argName) != constVals.end()) {
+                        auto newVal = constVals[argName];
+                        arg.changeVal(newVal.first);
+                        arg.changeClassName(newVal.second);
+                        arg.setIsConst(true);
+                        changed = true;
+                    }
+                }
+            }
+            if (instr.getInstrName() == INSTR_IF_JUMP || instr.getInstrName() == INSTR_IF_NOT_JUMP) {
+                if (!(*instr.getArgs())[0].getIsConst()) {
+                    continue;
+                }
+                auto target = General::String((*instr.getArgs())[1].getVal());
+                bool argVal = bool(std::stoi((*instr.getArgs())[0].getVal()));
+                //std::cerr << "wchodzę, argVal=" << argVal << ", target=" << target.getVal() << std::endl;
+
+                bool change = (instr.getInstrName() == INSTR_IF_JUMP && argVal) ||
+                              (instr.getInstrName() == INSTR_IF_NOT_JUMP && !argVal);
+                b->listInstr()->pop_back();
+                if (change) {
+                    auto newInstr = General::Instr(INSTR_JUMP, OP_NULL, General::Type(""), argsType{target});
+                    b->listInstr()->push_back(newInstr);
+                }
+                break;
+            }
+        }
+    }
+    return changed;
 }
 
-bool Optimizer::commonSubexpressionElimination() {
-    return false;
+std::string getExprHash(General::Instr &instr) {
+    std::string exprHash = instr.getOpName();
+    for (auto &arg: *instr.getArgs()) {
+        exprHash += "_" + arg.getVal();
+    }
+    return exprHash;
 }
 
-void Optimizer::optimize() {
-    std::cerr << "\n\n\n\n\nOptimizer:\n" << std::endl;
-    print();
+bool Optimizer::commonSubexpressionElimination() { // both local and global
+    std::unordered_map<Ident, std::unordered_map<std::string, int>> blockToExprs; // key = {tempName}_{exprAsString}
+    std::unordered_map<Ident, std::unordered_map<Ident, Ident>> tempsToReplace;
+    std::unordered_set<Ident> blocksParsed;
+    std::unordered_map<Ident, int> blocksInVisited;
+    std::queue<Ident> blocksQueue;
+    for (auto &block: *blocks) {
+        blocksInVisited[block->getLabel()] = 0;
+    }
+
+    bool changed = false;
+    for (auto &block: *blocks) {
+        auto blockLabel = block->getLabel();
+        if (blocksParsed.find(blockLabel) == blocksParsed.end()) {
+            if (blocksInVisited[blockLabel] == edges_in[blockLabel].size() &&
+                blocksParsed.find(blockLabel) == blocksParsed.end()) {
+                blocksQueue.push(blockLabel);
+                //std::cerr << "wrzucam blok " << blockLabel << std::endl;
+                while (!blocksQueue.empty()) {
+                    auto currBlock = blocksQueue.front();
+                    blockLabel = currBlock;
+                    //std::cerr << "wyjmuje " << currBlock << std::endl;
+                    blocksParsed.insert(blockLabel);
+                    blocksQueue.pop();
+                    auto edgesIn = edges_in[blockLabel];
+                    std::unordered_map<std::string, int> currTempToExpr;
+                    std::unordered_map<Ident, Ident> currTempsToReplace;
+
+                    // Collect expr from all incoming edges (GCSE)
+                    for (auto &blockIn: edgesIn) {
+                        auto &blockInExprs = blockToExprs[blockIn];
+                        //std::cerr << "block " << blockIn << " jest wchodzący" << std::endl;
+                        for (auto &tempToExpr: blockInExprs) {
+                            //std::cerr << "\tzwiekszam licznik dla " << tempToExpr.first << std::endl;
+                            currTempToExpr[tempToExpr.first]++;
+                        }
+
+                        auto &blockInTempToReplace = tempsToReplace[blockIn];
+                        for (auto &tempToTemp: blockInTempToReplace) {
+                            //std::cerr << "\tdodaje " << tempToTemp.first << " to " << tempToTemp.second << std::endl;
+                            currTempsToReplace.insert(tempToTemp);
+                        }
+                    }
+
+                    // Check if every expression is contained in each branch (GCSE)
+                    auto targetSize = edgesIn.size();
+                    std::unordered_map<std::string, int> newMap;
+                    std::unordered_map<std::string, Ident> exprToTemp;
+                    for (auto &availExpr: currTempToExpr) {
+                        if (availExpr.second == targetSize) {
+                            //std::cerr << "\t" << availExpr.first << " jest dostępne!" << std::endl;
+                            newMap.insert(availExpr);
+                            auto hash = availExpr.first;
+                            size_t identExprSeparator = hash.find('_');
+                            auto ident = std::string(hash.begin(), hash.begin() + identExprSeparator);
+                            auto expr = std::string(hash.begin() + identExprSeparator + 1, hash.end());
+                            //std::cerr << "\tdzielę to na ident=" << ident << ", expr=" << expr << std::endl;
+                            exprToTemp[expr] = ident;
+                        }
+                    }
+
+                    // Iterate over all instructions (LCSE & GCSE)
+                    auto &currBlockRef = (*blocksMap)[currBlock];
+                    auto instrIt = currBlockRef->listInstr()->begin();
+                    while (instrIt != currBlockRef->listInstr()->end()) {
+                        auto &instr = *instrIt;
+                        //std::cerr << "\tcurr instr name = " << instr.getInstrName() << std::endl;
+
+                        // Replace variables with exprs detected in previous CSE iterations
+                        for (auto &arg: *instr.getArgs()) {
+                            if (arg.print() == "register" &&
+                                currTempsToReplace.find(arg.getVal()) != currTempsToReplace.end()) {
+                                //std::cerr << "\tzmieniam arg " << arg.getVal() << " na "
+                                //          << currTempsToReplace[arg.getVal()] << std::endl;
+                                arg.changeVal(currTempsToReplace[arg.getVal()]);
+                            }
+                        }
+
+                        // Check if expr can be replaced
+                        if (/*instr.getInstrName() == INSTR_CALL_RET ||*/
+                            (instr.getInstrName() == INSTR_ASSIGNMENT && instr.getOpName() != OP_PARAM)) {
+                            auto exprHash = getExprHash(instr);
+                            //std::cerr << "\tsprawdzam, czy można zastąpić " << exprHash << std::endl;
+                            if (exprToTemp.find(exprHash) != exprToTemp.end()) {
+                                //std::cerr << "\ttak, można zastąpić!" << std::endl;
+                                currTempsToReplace[instr.getRes()->getVal()] = exprToTemp[exprHash];
+                                instrIt++;
+                                currBlockRef->listInstr()->erase(std::prev(instrIt));
+                                changed = true;
+                                continue;
+                            }
+                            //std::cerr << "dodaję " << exprHash << " do exprToTemp" << std::endl;
+                            exprToTemp[exprHash] = instr.getRes()->getVal();
+                            auto instrHash = instr.getRes()->getVal() + '_' + exprHash;
+                            newMap[instrHash] = 1;
+                        }
+                        instrIt++;
+                    }
+
+                    blockToExprs[currBlock] = newMap;
+                    tempsToReplace[currBlock] = currTempsToReplace;
+
+                    for (auto &blockOut: edges_out[blockLabel]) {
+                        blocksInVisited[blockOut]++;
+                        //std::cerr << "\tblocks visited dla " << blockOut << " maja rozmiar " << blocksInVisited[blockOut]
+                        //          << std::endl;
+                        if (blocksInVisited[blockOut] == edges_in[blockOut].size()) {
+                            //std::cerr << "\todwiedziłem wchodzące do " << blockOut << std::endl;
+                            blocksQueue.push(blockOut);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return changed;
+}
+
+void Optimizer::eliminateDeadCode() {
+
+}
+
+void Optimizer::optimize(bool debug) {
+    if (debug) {
+        std::cout << "Code before optimizations:\n";
+        print();
+    }
 
     bool changed = true;
     while (changed) {
-        changed = false;
-        changed |= copyPropagation();
-        changed |= constPropagation();
+        while (changed) {
+            changed = false;
+            changed |= copyPropagation();
+            changed |= constPropagation();
+        }
+        createGraph();
         changed |= commonSubexpressionElimination();
     }
 
-    print();
-
-    //std::cerr << "\ncreating graph" << std::endl;
     createGraph();
-    //print();
-    //std::cerr << "\neliminating phis" << std::endl;
+
+    setUsedInJump();
+
     eliminatePhi();
-    //print();
 
-    //std::cerr << "\ncurrent code:" << std::endl;
-
-    //std::cerr << "\n\n\nconcating blocks" << std::endl;
     concatBlocks();
 
-    //std::cerr << "\n\n\n\nafter concat:" << std::endl;
-    //print();
-    computeDataFlow();
+    computeDataFlow(); // useless without register allocation
+
+    if (debug) {
+        std::cout << "\n\n\n\nCode after optimizations:\n";
+        print();
+    }
 }

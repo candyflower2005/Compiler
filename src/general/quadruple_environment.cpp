@@ -16,9 +16,9 @@ Ident General::QuadrupleEnvironment::getFreshTemp() {
 Ident General::QuadrupleEnvironment::getFreshLabel(const std::string &prefix) {
     blockCnt++;
     if (prefix.empty()) {
-        return "block" + std::to_string(blockCnt);
+        return ".block" + std::to_string(blockCnt);
     }
-    return prefix + "_block" + std::to_string(blockCnt);
+    return "." + prefix + "_block" + std::to_string(blockCnt);
 }
 
 void General::QuadrupleEnvironment::addNewBlock(Ident label, General::QuadrupleBlock *newBlock) {

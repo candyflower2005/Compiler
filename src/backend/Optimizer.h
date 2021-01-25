@@ -28,6 +28,10 @@ class Optimizer {
 
     bool commonSubexpressionElimination(); // both local and global
 
+    void setUsedInJump();
+
+    void eliminateDeadCode();
+
 public:
     Optimizer(General::QuadrupleEnvironment &env);
 
@@ -35,7 +39,7 @@ public:
 
     std::unordered_map<Ident, General::QuadrupleBlock *> *getBlocksMap();
 
-    void optimize();
+    void optimize(bool debug);
 
     std::map<Ident, FunctionDef *> funDefs;
 

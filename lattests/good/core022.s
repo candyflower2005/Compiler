@@ -3,17 +3,11 @@
 main:
 	push %ebp
 	movl %esp, %ebp
-	subl $12, %esp
-	movl $0, %eax
-	movl %eax, -4(%ebp)
-	movl -4(%ebp), %eax
-	movl %eax, -8(%ebp)
-	push -8(%ebp)
+	subl $0, %esp
+	push $0
 	call fun_printInt
 	add $4, %esp
-	movl $0, %eax
-	movl %eax, -12(%ebp)
-	movl -12(%ebp),  %eax
+	xor %eax, %eax
 	movl  %ebp, %esp
 	pop %ebp
 	ret

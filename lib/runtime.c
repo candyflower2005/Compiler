@@ -36,7 +36,7 @@ extern char *fun_readString() {
 }
 
 extern void fun_error() {
-    fprintf(stderr, "ERROR\n");
+    fprintf(stderr, "runtime error\n");
     exit(1);
 }
 

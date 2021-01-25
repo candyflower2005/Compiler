@@ -80,7 +80,7 @@ void AssemblyCodeGenerator::handleJump(General::Instr &currInstr, General::Instr
 
     auto target = (*currInstr.getArgs())[1].getVal();
 
-    if (&currInstr == &lastInstr || lastInstr.getInstrName() == INSTR_CALL_RET) {
+    if (&currInstr == &lastInstr) {
         auto jumpVal = (*currInstr.getArgs())[0];
         auto t1 = tempToStack[jumpVal.getVal()];
 
@@ -98,7 +98,7 @@ void AssemblyCodeGenerator::handleJump(General::Instr &currInstr, General::Instr
     auto jumpVal = (*lastInstr.getArgs())[0];
     auto t1 = tempToStack[jumpVal.getVal()];
 
-    if (jumpVal.print() == "bool") {
+    if (jumpVal.print() == "bool" || jumpVal.print() == "int") {
         t1 = "$" + jumpVal.getVal();
     }
 
@@ -124,7 +124,12 @@ void AssemblyCodeGenerator::handleJump(General::Instr &currInstr, General::Instr
         return;
     }
 
-    auto t2 = tempToStack[(*lastInstr.getArgs())[1].getVal()];
+    auto secondJumpVal =  (*lastInstr.getArgs())[1];
+    auto t2 = tempToStack[secondJumpVal.getVal()];
+
+    if (secondJumpVal.print() == "bool" || secondJumpVal.print() == "int") {
+        t2 = "$" + secondJumpVal.getVal();
+    }
     assInstr.emplace_back("movl " + t2 + ", %ebx");
 
     assInstr.emplace_back("cmpl %ebx, %eax");
@@ -237,13 +242,6 @@ void AssemblyCodeGenerator::handleAss(General::Instr &currInstr, std::vector<std
     }
     if (arg1.print() == "register") {
         assInstr.emplace_back("movl " + tempToStack[arg1.getVal()] + ", %ebx");
-    }
-
-    if (currInstr.getOpName() == OP_AND) {
-        assInstr.emplace_back("and %ebx, %eax");
-    }
-    if (currInstr.getOpName() == OP_OR) {
-        assInstr.emplace_back("or %ebx, %eax");
     }
 
     if (currInstr.getOpName() == OP_EQU) {
@@ -369,14 +367,17 @@ AssemblyCodeGenerator::generateFunCode(std::vector<General::QuadrupleBlock *>::i
                 auto lastInstr = instrIt;
                 if ((instrIt->getInstrName() == INSTR_IF_NOT_JUMP || instrIt->getInstrName() == INSTR_IF_JUMP) &&
                     lastInstr != b->listInstr()->begin()) {
-                    while (!lastInstr->isUsedInJump()) {
-                        lastInstr--;
+                    if (instrIt->isSearchForUsedInJump()) {
+                        while (!lastInstr->isUsedInJump()) {
+                            lastInstr--;
+                        }
                     }
                 }
                 handleJump(*instrIt, *lastInstr, rest, firstFree);
             }
             if (instrIt->getInstrName() == INSTR_ASSIGNMENT) {
                 if (instrIt->isUsedInJump() || instrIt->getOpName() == OP_PARAM) {
+                    //std::cerr << instrIt->getRes()->getVal() << " jest used in jump " << std::endl;
                     continue;
                 }
                 handleAss(*instrIt, rest, firstFree);

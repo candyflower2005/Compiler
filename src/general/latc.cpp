@@ -61,7 +61,11 @@ int main(int argc, char **argv) {
     //newEnv.print();
 
     Optimizer opt(newEnv);
-    opt.optimize();
+    bool debug = false;
+    if ((argc > 2 && strcmp(argv[2], "--debug") == 0) || ((argc > 3 && strcmp(argv[3], "--debug") == 0))) {
+       debug = true;
+    }
+    opt.optimize(debug);
 
     AssemblyCodeGenerator assCodeGen(opt);
     std::string out_code = assCodeGen.generateCode();

@@ -1,8 +1,14 @@
-Korzystam z kodu pośredniego w formacie SSA. Kod nie zawiera jeszcze żadnych optymalizacji, będą one dodane w późniejszym terminie.
-Z tego powodu nie skupiałem się bardzo na wydajności kodu. Przykładowo, t = a op b zawsze działa następująco:
-reg1 = load a
-reg2 = load b
-t = reg1 op reg2
-store t
+Korzystam z kodu pośredniego w formacie SSA.
+By rozwiązanie działało na studentsie, używam i686-linux-gnu-gcc zamiast gcc.
+Można je za to włączyć dodając 'gcc' jako drugi argument.
 
-By rozwiązanie się kompilowało, korzystam z i686-linux-gnu-gcc zamiast gcc. Można je za to włączyć dodając 'gcc' jako drugi argument.
+Zastosowane optymalizacje:
+- propagacja kopii (przy użyciu algorytmu Find&Union, tak by przykłady z długimi "ścieżkami" przypisań działały szybko)
+- propagacja stałych
+- LCSE, GCSE (robię to w obrębie jednej funkcji, praktycznie w taki sam sposób, ponieważ kod jest w postaci SSA)
+
+Implementacja optymalizacji jest dostępna w pliku src/backend/Optimizer.cpp (uruchamiane w metodzie 'optimize')
+
+Uruchomienie programu z opcją --debug wypisuje na standardowe wyjście kod czwórkowy przed i po optymalizacjach:
+
+./latc_x86 {ścieżka_do_pliku} --debug

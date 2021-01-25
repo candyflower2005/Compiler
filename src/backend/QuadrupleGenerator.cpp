@@ -306,8 +306,8 @@ void QuadrupleGenerator::visitWhile(While *p) {
     currBlock = newAfterWhileBlock;
 
     Ident lastBodyBlockLabel = newBodyQGen.currBlock->getLabel();
-    env.generatePhiInstr(condLabel, localEnv, lastBodyBlockLabel, env, currLabel, whileBodyLabel);
-    env.generatePhiInstr(afterWhileLabel, localEnv, lastBodyBlockLabel, env, condLabel, afterWhileLabel);
+    env.generatePhiInstr(condLabel, localEnv, lastBodyBlockLabel, env, currLabel, newBodyQGen.currBlock->getLabel());
+    //env.generatePhiInstr(afterWhileLabel, localEnv, lastBodyBlockLabel, env, condLabel, afterWhileLabel);
 }
 
 // TODO usunąć trywialne phi (takie, które odnoszą się do swojego bloku i zmienna nie zmienia się)

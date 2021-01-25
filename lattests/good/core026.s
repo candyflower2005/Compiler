@@ -3,10 +3,8 @@
 fun_d:
 	push %ebp
 	movl %esp, %ebp
-	subl $4, %esp
-	movl $0, %eax
-	movl %eax, -4(%ebp)
-	movl -4(%ebp),  %eax
+	subl $0, %esp
+	xor %eax, %eax
 	movl  %ebp, %esp
 	pop %ebp
 	ret
@@ -14,16 +12,12 @@ fun_d:
 fun_s:
 	push %ebp
 	movl %esp, %ebp
-	subl $12, %esp
+	subl $4, %esp
 	movl 8(%ebp), %eax
-	movl %eax, -4(%ebp)
-	movl $1, %eax
-	movl %eax, -8(%ebp)
-	movl -4(%ebp), %eax
-	movl -8(%ebp), %ebx
+	movl $1, %ebx
 	add %ebx, %eax
-	movl %eax, -12(%ebp)
-	movl -12(%ebp),  %eax
+	movl %eax, -4(%ebp)
+	movl -4(%ebp),  %eax
 	movl  %ebp, %esp
 	pop %ebp
 	ret
@@ -31,7 +25,7 @@ fun_s:
 main:
 	push %ebp
 	movl %esp, %ebp
-	subl $328, %esp
+	subl $324, %esp
 	call fun_d
 	movl %eax, -4(%ebp)
 	push -4(%ebp)
@@ -357,9 +351,7 @@ main:
 	push -324(%ebp)
 	call fun_printInt
 	add $4, %esp
-	movl $0, %eax
-	movl %eax, -328(%ebp)
-	movl -328(%ebp),  %eax
+	xor %eax, %eax
 	movl  %ebp, %esp
 	pop %ebp
 	ret
