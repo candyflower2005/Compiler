@@ -1,19 +1,26 @@
-/* Test boolean operators. */
-
 int main() {
-  return 0 ;
+	foo(10);
+	return 0;
 }
 
-void foo(int s) {
-  int i = 5;
-  if (s > 5) {
-  	//i = i + 2;
-  } else {
-  	i = i + 1;
-  }
-  i = i + 3;
-  i = i + 4;
-  printInt(i);
-  printString("fasfa");
-  printString("afasfas" + "!@412");
+void foo(int a) {
+	int b = a + 1;
+	boolean c = 2*b-4 > 5;
+	while (!(a <= 0)) {
+		printInt(2*b-4);
+		a--;
+		if(a > 0){
+
+		} else {
+			while (a % 2 == 0) {
+				a--;
+				printInt(20*b);
+			}
+		}
+	}
+	boolean p = 2*b-4 > 5;
+	if (p) {
+		printInt(2*a-4);
+	}
+	printInt(20*b);
 }

@@ -286,7 +286,7 @@ void Optimizer::setUsedInJump() {
             auto condTemp = (*lastInstr->getArgs())[0];
             if (condTemp.print() == "register") {
                 bool notFound = false;
-                while (lastInstr->getRes()->getVal() != condTemp.getVal() ) {
+                while (lastInstr->getRes()->getVal() != condTemp.getVal()) {
                     if (lastInstr == b->listInstr()->begin()) {
                         notFound = true;
                         break;
@@ -297,7 +297,6 @@ void Optimizer::setUsedInJump() {
                     lastInstr->getOpName() == OP_PARAM || notFound) {
                     continue;
                 }
-                //std::cerr << "ustawiam " << lastInstr->getRes()->getVal() << " na usedInJump" << std::endl;
                 lastInstr->setUsedInJump();
                 currInstr->setSearchForUsedInJump();
             }
@@ -357,7 +356,6 @@ bool Optimizer::copyPropagation() {
                     if (arg.print() == "register" && constVals.find(arg.getVal()) != constVals.end()) {
                         auto res = constVals[arg.getVal()];
                         if (res != "-1") {
-                            //std::cerr << arg.getVal() << " -> " << res << std::endl;
                             arg.changeVal(res);
                             changed = true;
                         }
@@ -375,18 +373,15 @@ bool Optimizer::constPropagation() {
     bool changed = false;
     for (auto &b: *blocks) {
         auto instrIt = b->listInstr()->begin();
-        //std::cerr << "block " << b->getLabel() << std::endl;
         while (instrIt != b->listInstr()->end()) {
             auto &instr = *instrIt;
             if (instr.getInstrName() == INSTR_ASSIGNMENT) {
-                //std::cerr << "instr z res=" << instr.getRes()->getVal() << std::endl;
                 bool allConst = true;
                 for (auto &arg: (*instr.getArgs())) {
                     if (!arg.getIsConst()) {
                         auto argName = arg.getVal();
                         if (constVals.find(argName) != constVals.end()) {
                             auto newVal = constVals[argName];
-                            //std::cerr << "\tzmieniam " << arg.getVal() << " na " << newVal.first << std::endl;
                             arg.changeVal(newVal.first);
                             arg.changeClassName(newVal.second);
                             arg.setIsConst(true);
@@ -396,6 +391,8 @@ bool Optimizer::constPropagation() {
                         }
                     }
                 }
+
+                // If all arguments are const exprs then we can compute output in the compilation phase
                 if (allConst) {
                     auto &args = *instr.getArgs();
                     auto opName = instr.getOpName();
@@ -455,7 +452,6 @@ bool Optimizer::constPropagation() {
                         continue;
                     }
                     instrIt++;
-                    //std::cerr << "usuwam " << (*std::prev(instrIt)).getRes()->getVal() << std::endl;
                     b->listInstr()->erase(std::prev(instrIt));
                 } else {
                     instrIt++;
@@ -480,13 +476,14 @@ bool Optimizer::constPropagation() {
                     }
                 }
             }
+
+            // Remove conditional jump condition's value can be computed in the compilation phase
             if (instr.getInstrName() == INSTR_IF_JUMP || instr.getInstrName() == INSTR_IF_NOT_JUMP) {
                 if (!(*instr.getArgs())[0].getIsConst()) {
                     continue;
                 }
                 auto target = General::String((*instr.getArgs())[1].getVal());
                 bool argVal = bool(std::stoi((*instr.getArgs())[0].getVal()));
-                //std::cerr << "wchodzę, argVal=" << argVal << ", target=" << target.getVal() << std::endl;
 
                 bool change = (instr.getInstrName() == INSTR_IF_JUMP && argVal) ||
                               (instr.getInstrName() == INSTR_IF_NOT_JUMP && !argVal);
@@ -503,6 +500,7 @@ bool Optimizer::constPropagation() {
 }
 
 std::string getExprHash(General::Instr &instr) {
+    // Hash: {op}_{arg0}_{arg1}_..._{argn}
     std::string exprHash = instr.getOpName();
     for (auto &arg: *instr.getArgs()) {
         exprHash += "_" + arg.getVal();
@@ -524,49 +522,48 @@ bool Optimizer::commonSubexpressionElimination() { // both local and global
     for (auto &block: *blocks) {
         auto blockLabel = block->getLabel();
         if (blocksParsed.find(blockLabel) == blocksParsed.end()) {
-            if (blocksInVisited[blockLabel] == edges_in[blockLabel].size() &&
+            // Check if all previous blocks have been already visited (or whether it's a loop)
+            if ((blocksInVisited[blockLabel] == edges_in[blockLabel].size() ||
+                 blockLabel.rfind(".loop_cond_", 0) == 0) &&
                 blocksParsed.find(blockLabel) == blocksParsed.end()) {
                 blocksQueue.push(blockLabel);
-                //std::cerr << "wrzucam blok " << blockLabel << std::endl;
                 while (!blocksQueue.empty()) {
                     auto currBlock = blocksQueue.front();
                     blockLabel = currBlock;
-                    //std::cerr << "wyjmuje " << currBlock << std::endl;
-                    blocksParsed.insert(blockLabel);
                     blocksQueue.pop();
+                    if (blocksParsed.find(blockLabel) != blocksParsed.end()) {
+                        continue;
+                    }
+                    blocksParsed.insert(blockLabel);
                     auto edgesIn = edges_in[blockLabel];
                     std::unordered_map<std::string, int> currTempToExpr;
                     std::unordered_map<Ident, Ident> currTempsToReplace;
 
-                    // Collect expr from all incoming edges (GCSE)
+                    // Collect availables expr from all incoming edges (GCSE)
                     for (auto &blockIn: edgesIn) {
                         auto &blockInExprs = blockToExprs[blockIn];
-                        //std::cerr << "block " << blockIn << " jest wchodzący" << std::endl;
                         for (auto &tempToExpr: blockInExprs) {
-                            //std::cerr << "\tzwiekszam licznik dla " << tempToExpr.first << std::endl;
                             currTempToExpr[tempToExpr.first]++;
                         }
 
                         auto &blockInTempToReplace = tempsToReplace[blockIn];
                         for (auto &tempToTemp: blockInTempToReplace) {
-                            //std::cerr << "\tdodaje " << tempToTemp.first << " to " << tempToTemp.second << std::endl;
                             currTempsToReplace.insert(tempToTemp);
                         }
                     }
 
-                    // Check if every expression is contained in each branch (GCSE)
+                    // Check if every expression is contained in each branch (GCSE) (or whether it's a loop)
                     auto targetSize = edgesIn.size();
                     std::unordered_map<std::string, int> newMap;
                     std::unordered_map<std::string, Ident> exprToTemp;
                     for (auto &availExpr: currTempToExpr) {
-                        if (availExpr.second == targetSize) {
-                            //std::cerr << "\t" << availExpr.first << " jest dostępne!" << std::endl;
+                        if (availExpr.second == targetSize || (blockLabel.rfind(".loop_cond_", 0) == 0) &&
+                                                              availExpr.second == targetSize - 1) {
                             newMap.insert(availExpr);
                             auto hash = availExpr.first;
                             size_t identExprSeparator = hash.find('_');
                             auto ident = std::string(hash.begin(), hash.begin() + identExprSeparator);
                             auto expr = std::string(hash.begin() + identExprSeparator + 1, hash.end());
-                            //std::cerr << "\tdzielę to na ident=" << ident << ", expr=" << expr << std::endl;
                             exprToTemp[expr] = ident;
                         }
                     }
@@ -576,35 +573,30 @@ bool Optimizer::commonSubexpressionElimination() { // both local and global
                     auto instrIt = currBlockRef->listInstr()->begin();
                     while (instrIt != currBlockRef->listInstr()->end()) {
                         auto &instr = *instrIt;
-                        //std::cerr << "\tcurr instr name = " << instr.getInstrName() << std::endl;
 
-                        // Replace variables with exprs detected in previous CSE iterations
+                        // Check if any arg was changed in previous CSE iterations and replace it
                         for (auto &arg: *instr.getArgs()) {
                             if (arg.print() == "register" &&
                                 currTempsToReplace.find(arg.getVal()) != currTempsToReplace.end()) {
-                                //std::cerr << "\tzmieniam arg " << arg.getVal() << " na "
-                                //          << currTempsToReplace[arg.getVal()] << std::endl;
                                 arg.changeVal(currTempsToReplace[arg.getVal()]);
                             }
                         }
 
-                        // Check if expr can be replaced
-                        if (/*instr.getInstrName() == INSTR_CALL_RET ||*/
-                            (instr.getInstrName() == INSTR_ASSIGNMENT && instr.getOpName() != OP_PARAM)) {
+                        // Check if expr can be replaced by computing its hash and remove it's instruction
+                        if (instr.getInstrName() == INSTR_ASSIGNMENT && instr.getOpName() != OP_PARAM) {
                             auto exprHash = getExprHash(instr);
-                            //std::cerr << "\tsprawdzam, czy można zastąpić " << exprHash << std::endl;
                             if (exprToTemp.find(exprHash) != exprToTemp.end()) {
-                                //std::cerr << "\ttak, można zastąpić!" << std::endl;
                                 currTempsToReplace[instr.getRes()->getVal()] = exprToTemp[exprHash];
                                 instrIt++;
                                 currBlockRef->listInstr()->erase(std::prev(instrIt));
                                 changed = true;
                                 continue;
                             }
-                            //std::cerr << "dodaję " << exprHash << " do exprToTemp" << std::endl;
-                            exprToTemp[exprHash] = instr.getRes()->getVal();
-                            auto instrHash = instr.getRes()->getVal() + '_' + exprHash;
-                            newMap[instrHash] = 1;
+                            if (!instr.isUsedInJump()) {
+                                exprToTemp[exprHash] = instr.getRes()->getVal();
+                                auto instrHash = instr.getRes()->getVal() + '_' + exprHash;
+                                newMap[instrHash] = 1;
+                            }
                         }
                         instrIt++;
                     }
@@ -614,10 +606,7 @@ bool Optimizer::commonSubexpressionElimination() { // both local and global
 
                     for (auto &blockOut: edges_out[blockLabel]) {
                         blocksInVisited[blockOut]++;
-                        //std::cerr << "\tblocks visited dla " << blockOut << " maja rozmiar " << blocksInVisited[blockOut]
-                        //          << std::endl;
                         if (blocksInVisited[blockOut] == edges_in[blockOut].size()) {
-                            //std::cerr << "\todwiedziłem wchodzące do " << blockOut << std::endl;
                             blocksQueue.push(blockOut);
                         }
                     }
@@ -646,6 +635,7 @@ void Optimizer::optimize(bool debug) {
             changed |= constPropagation();
         }
         createGraph();
+        setUsedInJump();
         changed |= commonSubexpressionElimination();
     }
 
